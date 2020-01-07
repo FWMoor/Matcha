@@ -1,8 +1,30 @@
-from flask import Flask, render_template, url_for, request, flash, redirect
+from flask import Flask, render_template, url_for, request, flash, redirect, g
+import sqlite3
 import re
 app = Flask(__name__)
-
 app.config['SECRET_KEY'] = 'dd35c1f1152a18e60a79dcafafed4b6c'
+
+import os
+import sqlite3
+
+# create a default path to connect to and create (if necessary) a database
+# called 'database.sqlite3' in the same directory as this script
+DEFAULT_PATH = os.path.join(os.path.dirname(__file__), 'site.db')
+
+def db_connect(db_path=DEFAULT_PATH):
+	con = sqlite3.connect(db_path)
+	return con
+
+con = db_connect()
+cur = con.cursor()
+users_sql = """
+CREATE TABLE users (
+	id integer PRIMARY KEY,
+	username text NOT NULL,
+	email text NOT NULL,
+	password text NOT NULL
+)"""
+cur.execute(users_sql)
 
 post = [
 	{
