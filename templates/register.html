@@ -1,15 +1,48 @@
 {% extends "layout.html" %} {% block content %}
 
-<div class="content-section">
-	<form method="POST" action="">
-		{{ form.hidden_tag() }}
-		<fieldset class="form-group">
-			<legend class="border-bottom mb-4">Join Today</legend>
-			<dir class="form-group">
-				{{form.username.label}}
-			</dir>
-		</fieldset>
-	</form>
+<div class="page-wrapper bg-gra-02 p-t-130 p-b-100 font-poppins">
+	<div class="wrapper wrapper--w680">
+		<div class="card card-4">
+			<div class="card-body">
+				<h2 class="title">Registration Form</h2>
+				<form method="POST">
+					<div class="row row-space">
+						<div class="col-6">
+							<div class="input-group">
+								<label class="label">first name</label>
+								<input class="form-control" type="text" name="first_name" />
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="input-group">
+								<label class="label">last name</label>
+								<input class="form-control" type="text" name="last_name" />
+							</div>
+						</div>
+					</div>
+					<div class="row row-space">
+						<div class="col-6">
+							<div class="input-group">
+								<label class="label">Email</label>
+								<input class="form-control" type="email" name="email" />
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="input-group">
+								<label class="label">Phone Number</label>
+								<input class="form-control" type="text" name="phone" />
+							</div>
+						</div>
+					</div>
+					<div class="p-t-15">
+						<button class="btn btn--radius-2 btn--blue" type="submit">
+							Submit
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 
 {% endblock content %}
