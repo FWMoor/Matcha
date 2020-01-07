@@ -12,10 +12,6 @@
 			rel="stylesheet"
 			href="{{ url_for('static', filename='main.css') }}"
 		/>
-		<!-- <link
-			rel="stylesheet"
-			href="{{ url_for('static', filename='auth.css') }}"
-		/> -->
 		{% if title %}
 		<title>Matcha - {{ title }}</title>
 		{% else %}
@@ -55,7 +51,7 @@
 
 		<main role="main" class="container">
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-md-8 offset-md-2">
 					{% block content %}{% endblock %}
 				</div>
 				<!-- <div class="col-md-4">
