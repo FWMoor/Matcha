@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, flash, redirect
 import re
 app = Flask(__name__)
 
@@ -26,26 +26,32 @@ def about():
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
-	errors = []
 	if request.method == 'POST':
+		error = 0
 		regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
 		uidLen = len(request.form['username'])
 		if uidLen < 6 or uidLen > 20:
-			errors.append('Username should be between 6 and 20 characters')
+			flash('Username should be between 6 and 20 characters!', 'danger')
+			error = 1
 		if request.form['password'] != request.form['confirm']:
-			errors.append('Passwords don\'t match!')
+			flash('Passwords do not match!', 'danger')
+			error = 1
 		if not re.search(regex, request.form['email']):
-			errors.append('Enter a valid email')
-		if len(errors) == 0:
-			return render_template('about.html', title='It worked')
-	return render_template('register.html', title='Register', errors=errors)
+			flash('Enter a valid email!', 'danger')
+			error = 1
+		if error == 0:
+			uid = request.form['username']
+			flash(f'Account for {uid} created!', 'success')
+			return redirect(url_for('home'))
+	return render_template('register.html', title='Register')
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
-	errors = []
 	if request.method == 'POST':
-		if len(errors) == 0:
-			return render_template('about.html', title='It worked')
+		error = 0
+		if error == 0:
+			flash('Welcome back!', 'success')
+			return redirect(url_for('home'))
 	return render_template('login.html', title='Login')
 
 if __name__ == '__main__':
