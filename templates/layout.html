@@ -20,37 +20,67 @@
 	</head>
 	<body>
 		<header class="site-header">
-			<nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
-				<div class="container">
-					<a class="navbar-brand mr-4" href="/">Matcha</a>
-					<button
-						class="navbar-toggler"
-						type="button"
-						data-toggle="collapse"
-						data-target="#navbarToggle"
-						aria-controls="navbarToggle"
-						aria-expanded="false"
-						aria-label="Toggle navigation"
-					>
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					<div class="collapse navbar-collapse" id="navbarToggle">
-						<div class="navbar-nav mr-auto">
-							<a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
-							<a class="nav-item nav-link" href="{{ url_for('about') }}"
-								>About</a
+			<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+				<a class="navbar-brand" href="/">Matcha</a>
+				<button
+					class="navbar-toggler"
+					type="button"
+					data-toggle="collapse"
+					data-target="#navbarColor01"
+					aria-controls="navbarColor01"
+					aria-expanded="false"
+					aria-label="Toggle navigation"
+				>
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarColor01">
+					<ul class="navbar-nav mr-auto">
+						{% if session.logged_in %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('feed') }}"
+								>Feed</a
 							>
-						</div>
-						<!-- Navbar Right Side -->
-						<div class="navbar-nav">
-							<a class="nav-item nav-link" href="{{ url_for('login') }}"
+						</li>
+						{% else %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('home') }}"
+								>Home</a
+							>
+						</li>
+						{% endif %}
+					</ul>
+					<ul class="navbar-nav ml-auto">
+						{% if session.logged_in %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('profile') }}"
+								>Profile</a
+							>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('logout') }}"
+								>Logout</a
+							>
+						</li>
+						{% else %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('login') }}"
 								>Login</a
 							>
-							<a class="nav-item nav-link" href="{{ url_for('register') }}"
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('register') }}"
 								>Register</a
 							>
-						</div>
-					</div>
+						</li>
+						{% endif %}
+					</ul>
+					<!-- <form class="form-inline my-2 my-lg-0">
+						<input class="form-control mr-sm-2" type="text" placeholder="Search" />
+						<button class="btn btn-secondary my-2 my-sm-0" type="submit">
+							Search
+						</button>
+					</form> -->
 				</div>
 			</nav>
 		</header>
@@ -58,13 +88,14 @@
 		<main role="main" class="container">
 			<div class="row">
 				<div class="col-md-8 offset-md-2">
-					{% with messages = get_flashed_messages(with_categories=true) %} {% if
-					messages %} {% for category, message in messages %}
+					{% with messages =
+					get_flashed_messages(with_categories=true) %} {% if messages
+					%} {% for category, message in messages %}
 					<div class="alert alert-{{ category}}">
 						{{ message }}
 					</div>
-					{% endfor %} {% endif %} {% endwith %} {%block content %}{% endblock
-					%}
+					{% endfor %} {% endif %} {% endwith %} {%block content %}{%
+					endblock %}
 				</div>
 				<!-- <div class="col-md-4">
 					<div class="content-section text-center">
