@@ -43,13 +43,13 @@
 					<ul class="navbar-nav mr-auto">
 						{% if session.logged_in %}
 						<li class="nav-item">
-							<a class="nav-link" href="{{ url_for('feed') }}"
+							<a class="nav-link" href="{{ url_for('main.feed') }}"
 								>Feed</a
 							>
 						</li>
 						{% else %}
 						<li class="nav-item">
-							<a class="nav-link" href="{{ url_for('home') }}"
+							<a class="nav-link" href="{{ url_for('main.home') }}"
 								>Home</a
 							>
 						</li>
@@ -58,23 +58,23 @@
 					<ul class="navbar-nav ml-auto">
 						{% if session.logged_in %}
 						<li class="nav-item">
-							<a class="nav-link" href="{{ url_for('profile') }}"
+							<a class="nav-link" href="{{ url_for('users.profile') }}"
 								>Profile</a
 							>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="{{ url_for('logout') }}"
+							<a class="nav-link" href="{{ url_for('auth.logout') }}"
 								>Logout</a
 							>
 						</li>
 						{% else %}
 						<li class="nav-item">
-							<a class="nav-link" href="{{ url_for('login') }}"
+							<a class="nav-link" href="{{ url_for('auth.login') }}"
 								>Login</a
 							>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="{{ url_for('register') }}"
+							<a class="nav-link" href="{{ url_for('auth.register') }}"
 								>Register</a
 							>
 						</li>

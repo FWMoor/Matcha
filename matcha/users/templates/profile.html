@@ -4,4 +4,11 @@ session.username == username.lower() %}
 <h2>Welcome {{session.username}}</h2>
 {% else %}
 <h1>Profile <small>{{username}}</small></h1>
-{% endif %} {% endblock %}
+{% endif %}
+
+<form action="" method="post">
+	<input type="text" name="location" id="location">
+	<button type="submit">Save</button>
+</form>
+
+{% endblock %}
