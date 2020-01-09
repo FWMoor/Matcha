@@ -1,6 +1,7 @@
 {% extends 'layout.html' %} {% block content %} {% if not username or
 session.username == username.lower() %}
-<h2>Profile <small>Welcome {{session.username}}</small></h2>
+<h1>Profile</h1>
+<h2>Welcome {{session.username}}</h2>
 {% else %}
-<h2>Profile <small>{{username}}</small></h2>
+<h1>Profile <small>{{username}}</small></h1>
 {% endif %} {% endblock %}

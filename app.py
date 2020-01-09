@@ -22,6 +22,10 @@ def register():
 		error = 0
 		regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
 		uidLen = len(request.form['username'])
+
+		con = db_connect()
+		cur = con.cursor()
+
 		if uidLen < 6 or uidLen > 20:
 			flash('Username should be between 6 and 20 characters!', 'danger')
 			error = 1
@@ -31,20 +35,23 @@ def register():
 		if not re.search(regex, request.form['email']):
 			flash('Enter a valid email!', 'danger')
 			error = 1
+
 		if error == 0:
 			uid = request.form['username']
 			email = request.form['email']
-			password = hash_password(request.form['password'])
+			cur.execute("SELECT * FROM users WHERE username=? OR email=?", (uid, email))
+			rows = cur.fetchall()
+			if rows == 0:
+				password = hash_password(request.form['password'])
+				cur.execute("INSERT INTO users VALUES (null, ?, ?, ?)",
+							[(uid), (email), (password)])
+				con.commit()
+				con.close()
 
-			con = db_connect()
-			cur = con.cursor()
-			cur.execute("""INSERT INTO users VALUES (null, ?, ?, ?)""",
-						[(uid), (email), (password)])
-			con.commit()
-			con.close()
-
-			flash(f'Account for {uid} created!', 'success')
-			return redirect(url_for('login'))
+				flash(f'Account for {uid} created!', 'success')
+				return redirect(url_for('login'))
+			else:
+				flash('User already exists!', 'danger')
 	return render_template('register.html')
 
 
@@ -61,7 +68,6 @@ def login():
 		cur.execute(
 			"""SELECT * FROM users WHERE email=? OR username=?""", [email, email])
 		result = cur.fetchone()
-		con.commit()
 		con.close()
 
 		if result:
@@ -73,6 +79,8 @@ def login():
 				session['username'] = result['username'].lower()
 				flash('Welcome back!', 'success')
 				return redirect(url_for('profile'))
+		else:
+			flash('User does not exist!', 'danger')
 	return render_template('login.html')
 
 

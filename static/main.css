@@ -13,6 +13,10 @@ h6 {
 	color: #444444;
 }
 
+nav {
+	margin-bottom: 2em;
+}
+
 .bg-steel {
 	background-color: #4f33ff;
 }
