@@ -6,10 +6,12 @@ from matcha.decorators import not_logged_in, is_logged_in
 from matcha.auth.routes import auth
 from matcha.main.routes import main
 from matcha.users.routes import users
+from matcha.errors.handlers import errors
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dd35c1f1152a18e60a79dcafafed4b6c'
 
 app.register_blueprint(main)
+app.register_blueprint(errors)
 app.register_blueprint(auth, url_prefix="/auth")
-app.register_blueprint(users, url_prefix="/users")
+app.register_blueprint(users, url_prefix="/user")
