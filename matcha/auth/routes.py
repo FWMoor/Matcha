@@ -38,10 +38,11 @@ def register():
 				flash(f'Username or Email is already taken.', 'danger')
 				return redirect(url_for('auth.register'))
 			else:
+				fname = request.form['fname']
+				lname = request.form['lname']
 				password = hash_password(request.form['password'])
-
-				cur.execute("""INSERT INTO users VALUES (null, ?, ?, ?)""",
-							[(uid), (email), (password)])
+				cur.execute("INSERT INTO users VALUES (null, ?, ?, ?, ?, ?)",
+							[(fname), (lname), (uid), (email), (password)])
 				con.commit()
 				con.close()
 
