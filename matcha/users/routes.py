@@ -7,7 +7,6 @@ from matcha.decorators import is_logged_in
 users = Blueprint('users', __name__,
 				  template_folder='./templates', static_folder='static')
 
-
 @users.route('/profile', defaults={'username': None})
 @users.route('/profile/<username>')
 @is_logged_in

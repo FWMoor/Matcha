@@ -9,7 +9,6 @@ from matcha.db import db_connect, dict_factory
 auth = Blueprint('auth', __name__,
 				 template_folder='./templates', static_folder='static')
 
-
 @auth.route('/register', methods=['GET', 'POST'])
 @not_logged_in
 def register():
@@ -53,7 +52,6 @@ def register():
 	except TemplateNotFound:
 		abort(404)
 
-
 @auth.route('/login', methods=['GET', 'POST'])
 @not_logged_in
 def login():
@@ -86,7 +84,6 @@ def login():
 		return render_template('login.html')
 	except TemplateNotFound:
 		abort(404)
-
 
 @auth.route('/logout')
 @is_logged_in

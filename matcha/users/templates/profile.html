@@ -1,13 +1,18 @@
 {% extends 'layout.html' %} {% block content %} {% if not username or
 session.username == username.lower() %}
+
 <h1>Profile</h1>
+
 <h2>Welcome {{session.username}}</h2>
+
 {% else %}
+
 <h1>Profile <small>{{username}}</small></h1>
+
 {% endif %}
 
 <form action="" method="post">
-	<input type="text" name="location" id="location">
+	<input type="text" name="location" id="location" />
 	<button type="submit">Save</button>
 </form>
 

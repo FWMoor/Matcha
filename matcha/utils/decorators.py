@@ -1,7 +1,6 @@
 from flask import url_for, flash, redirect, session
 from functools import wraps
 
-
 def is_logged_in(f):
 	@wraps(f)
 	def wrap(*args, **kwargs):
@@ -12,7 +11,6 @@ def is_logged_in(f):
 			return redirect(url_for('login'))
 	return wrap
 
-
 def is_admin(f):
 	@wraps(f)
 	def wrap(*args, **kwargs):
@@ -22,7 +20,6 @@ def is_admin(f):
 			flash('Unauthorized, Please login', 'danger')
 			return redirect(url_for('login'))
 	return wrap
-
 
 def not_logged_in(f):
 	@wraps(f)
