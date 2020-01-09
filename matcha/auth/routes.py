@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, url_for, request, flash, redirect, session, abort
-from jinja2 import TemplateNotFound
 import re
+from jinja2 import TemplateNotFound
 
 from matcha.auth.utils import hash_password, verify_password
 from matcha.decorators import not_logged_in, is_logged_in
@@ -15,7 +15,6 @@ def register():
 	if request.method == 'POST':
 		error = 0
 		con = db_connect()
-		con.row_factory = dict_factory
 		cur = con.cursor()
 		regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
 		uidLen = len(request.form['username'])
@@ -29,18 +28,16 @@ def register():
 			flash('Enter a valid email!', 'danger')
 			error = 1
 		if error == 0:
-			uid = request.form['username']
-			email = request.form['email']
+			uid = request.form['username'].lower()
+			email = request.form['email'].lower()
 			cur.execute(
-				"SELECT * FROM users WHERE username=? OR email=?", [uid, email])
-			rows = cur.fetchone()
-			if rows:
-				flash(f'Username or Email is already taken.', 'danger')
-				return redirect(url_for('auth.register'))
-			else:
+				"""SELECT * FROM users WHERE username=? OR email=?""", [uid, email])
+			rows = cur.fetchall()
+			if not rows:
 				fname = request.form['fname']
 				lname = request.form['lname']
 				password = hash_password(request.form['password'])
+
 				cur.execute("INSERT INTO users VALUES (null, ?, ?, ?, ?, ?)",
 							[(fname), (lname), (uid), (email), (password)])
 				con.commit()
@@ -48,25 +45,28 @@ def register():
 
 				flash(f'Account for {uid} created!', 'success')
 				return redirect(url_for('auth.login'))
+			else:
+				flash(f'Username or Email is already taken.', 'danger')
+				return redirect(url_for('auth.register'))
 	try:
 		return render_template('register.html')
 	except TemplateNotFound:
 		abort(404)
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 @not_logged_in
 def login():
 	if request.method == 'POST':
 		error = 0
-		email = request.form['email']
+		email = request.form['email'].lower()
 		password = request.form['password']
 		con = db_connect()
 		con.row_factory = dict_factory
 		cur = con.cursor()
 		cur.execute(
-			"SELECT * FROM users WHERE email=? OR username=?", [email, email])
+			"""SELECT * FROM users WHERE email=? OR username=?""", [email, email])
 		result = cur.fetchone()
-		con.commit()
 		con.close()
 
 		if result:
@@ -75,7 +75,8 @@ def login():
 				error = 1
 			if error == 0:
 				session['logged_in'] = True
-				session['username'] = result['username'].lower()
+				session['username'] = result['username']
+				session['email'] = result['email']
 				flash('Welcome back!', 'success')
 				return redirect(url_for('users.profile'))
 		else:
@@ -85,6 +86,7 @@ def login():
 		return render_template('login.html')
 	except TemplateNotFound:
 		abort(404)
+
 
 @auth.route('/logout')
 @is_logged_in

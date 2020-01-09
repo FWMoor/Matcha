@@ -1,0 +1,12 @@
+{% extends "layout.html" %} {% block content %}
+<div class="messages"></div>
+<form action="" method="POST">
+	<input type="text" class="message" placeholder="Messages" />
+	<input type="submit" value="send" />
+</form>
+
+<script
+	src="{{url_for('static', filename='js/socket.js')}}"
+	Content-Type="application/javascript"
+></script>
+{% endblock %}
