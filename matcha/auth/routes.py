@@ -76,6 +76,8 @@ def login():
 			if error == 0:
 				session['logged_in'] = True
 				session['username'] = result['username']
+				session['fname'] = result['fname']
+				session['lname'] = result['lname']
 				session['email'] = result['email']
 				flash('Welcome back!', 'success')
 				return redirect(url_for('users.profile'))
