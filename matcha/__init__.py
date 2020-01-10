@@ -13,7 +13,7 @@ from matcha.errors.handlers import errors
 from matcha.db import setup_tables
 from matcha.msg.routes import msg
 
-def create_app(debug=False):
+def create_app():
 	app = Flask(__name__)
 	app.config['SECRET_KEY'] = 'dd35c1f1152a18e60a79dcafafed4b6c'
 	setup_tables()

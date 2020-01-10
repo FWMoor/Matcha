@@ -38,7 +38,7 @@ def register():
 				lname = request.form['lname']
 				password = hash_password(request.form['password'])
 
-				cur.execute("INSERT INTO users VALUES (null, ?, ?, ?, ?, ?)",
+				cur.execute("INSERT INTO users (fname, lname, username, email, password) VALUES (?, ?, ?, ?, ?)",
 							[(fname), (lname), (uid), (email), (password)])
 				con.commit()
 				con.close()
