@@ -1,25 +1,26 @@
 // Connect socket
 var socket = io.connect('http://' + document.domain + ':' + location.port);
+var id = undefined
 
-socket.on('connect', () => {
-	socket.emit('Connect event', {
-		time: Date.now()
-	});
+function SelectRoom(_id)
+{
+	socket.emit('join', {'room': _id});
+	$('div.messages').empty();
+	$('.RoomId').text(_id);
+	id = _id;
+}
 
-	// Handel message sending 
-	$('form').on('submit', (e) => {
-		e.preventDefault()
-		// Set username serverside
-		let user_input = $('input.message').val()
-		socket.emit('SendChat event', {
-			message : user_input
-		})
+// Get update from server
+socket.on('update', (message) => {
+	$('div.messages').append(message + "<br/>");
+});
+
+// If send a chat
+$('.Chatfrm').on('submit', (e) => {
+	e.preventDefault()
+		let message = $('input.message').val();
 		// clear message box
-		$('input.message').val('').focus()
-		})
+		socket.emit('send', {'message': message, 'room': id});
+		$('input.message').val('').focus();
 });
 
-// add server rendered message here.
-socket.on('ServerReply', (message_template) => {
-	$('div.messages').append(message_template);
-});
