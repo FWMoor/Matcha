@@ -1,12 +1,25 @@
 {% extends "layout.html" %} {% block content %}
+<div class="Users">
+	{% for User in Matches %}
+		<a href="#" onclick="SelectRoom({{ User['matchId'] }})">
+			<span>{{ User["username"] }}</span>
+		</a>
+	{% endfor %}
+</div>
+
 <div class="messages"></div>
-<form action="" method="POST">
+	<h1 class="RoomId">NONE</h1>
+<form class="Chatfrm" method="POST">
 	<input type="text" class="message" placeholder="Enter a message" />
 	<input type="submit" value="send" />
 </form>
 
 <script
 	src="{{url_for('static', filename='js/socket.js')}}"
+	Content-Type="application/javascript"
+></script>
+<script
+	src="{{url_for('static', filename='js/location.js')}}"
 	Content-Type="application/javascript"
 ></script>
 {% endblock %}
