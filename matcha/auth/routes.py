@@ -6,6 +6,11 @@ from matcha.auth.utils import hash_password, verify_password
 from matcha.decorators import not_logged_in, is_logged_in
 from matcha.db import db_connect, dict_factory
 
+from matcha.auth.email import send_email
+
+import string
+import secrets
+
 auth = Blueprint('auth', __name__,
 				 template_folder='./templates', static_folder='static')
 
@@ -30,21 +35,28 @@ def register():
 		if error == 0:
 			uid = request.form['username'].lower()
 			email = request.form['email'].lower()
-			cur.execute("SELECT * FROM users WHERE username=? OR email=?", [uid, email])
+			cur.execute('SELECT * FROM users WHERE username=? OR email=?', [uid, email])
 			rows = cur.fetchall()
 			if not rows:
 				fname = request.form['fname']
 				lname = request.form['lname']
 				password = hash_password(request.form['password'])
-				cur.execute("INSERT INTO users (fname, lname, username, email, password) VALUES (?, ?, ?, ?, ?)",
-							[(fname), (lname), (uid), (email), (password)])
+				alphabet = string.ascii_letters + string.digits
+				token = ''.join(secrets.choice(alphabet) for i in range(8))
+				confirm_url = url_for(
+					'auth.confirm_email', token=token, _external=True)
+				html = render_template(
+					'activate.html', confirm_url=confirm_url)
+				print(html)
+				subject = "Please confirm your email"
+				send_email(email, subject, html)
+				cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', [(fname), (lname), (uid), (email), (password), (token)])
 				con.commit()
 				con.close()
-
-				flash(f'Account for {uid} created!', 'success')
+				flash('Verification Email Sent!', 'success')
 				return redirect(url_for('auth.login'))
 			else:
-				flash(f'Username or Email is already taken.', 'danger')
+				flash('Username or Email is already taken!', 'danger')
 				return redirect(url_for('auth.register'))
 	try:
 		return render_template('register.html')
@@ -62,10 +74,13 @@ def login():
 		con = db_connect()
 		con.row_factory = dict_factory
 		cur = con.cursor()
-		cur.execute("SELECT * FROM users WHERE email=? OR username=?", [email, email])
+		cur.execute('SELECT * FROM users WHERE email=? OR username=?', [email, email])
 		result = cur.fetchone()
 		con.close()
 		if result:
+			if result['verify']:
+				flash('Account not verified!', 'danger')
+				error = 1
 			if not verify_password(result['password'], password):
 				flash('Email or Password is wrong!', 'danger')
 				error = 1
@@ -92,4 +107,27 @@ def login():
 def logout():
 	session.clear()
 	flash('Logout was successfull', 'success')
+	return redirect(url_for('auth.login'))
+
+@auth.route('/confirm/<token>')
+@not_logged_in
+def confirm_email(token):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute('SELECT * FROM users WHERE verify=?', [token])
+	user = cur.fetchone()
+	con.close()
+	if user:
+		email = user['email']
+		con = db_connect()
+		con.row_factory = dict_factory
+		cur = con.cursor()
+		cur.execute('UPDATE users SET verify=? WHERE email=?',
+					[None, email])
+		con.commit()
+		con.close()
+		flash('You have confirmed your account. Thanks!', 'success')
+	else:
+		flash('The confirmation link is invalid or has expired.', 'danger')
 	return redirect(url_for('auth.login'))

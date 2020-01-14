@@ -51,26 +51,35 @@
 					required
 				/>
 			</div>
-			<div>
+			<div class="form-check">
 				{% if user.notifications %}
 				<input
 					type="checkbox"
 					name="notifications"
 					id="notifications"
+					class="form-check-input"
 					checked
 				/>
 				{% else %}
 				<input
 					type="checkbox"
 					name="notifications"
+					class="form-check-input"
 					id="notifications"
 				/>
 				{% endif %}
-				<label for="notifications">Notifications?</label>
+				<label for="notifications" class="form-check-label"
+					>Notifications?</label
+				>
 			</div>
-			<div>
-				<input type="checkbox" name="location" id="location" />
-				<label for="location">Location?</label>
+			<div class="form-check">
+				<input
+					type="checkbox"
+					name="location"
+					id="location"
+					class="form-check-input"
+				/>
+				<label for="location" class="form-check-label">Location?</label>
 			</div>
 		</fieldset>
 		<div class="form-group d-flex justify-content-between">
