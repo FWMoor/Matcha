@@ -47,7 +47,6 @@ def register():
 					'auth.confirm_email', token=token, _external=True)
 				html = render_template(
 					'activate.html', confirm_url=confirm_url)
-				print(html)
 				subject = "Please confirm your email"
 				send_email(email, subject, html)
 				cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', [(fname), (lname), (uid), (email), (password), (token)])

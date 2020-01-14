@@ -49,6 +49,13 @@ def setup_tables():
 		preference TEXT NOT NULL
 	);""")
 	con.commit()
+	cur.execute("""CREATE TABLE IF NOT EXISTS photos (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		userId INTEGER NOT NULL,
+		path TEXT NOT NULL,
+		profile INTEGER
+	);""")
+	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		fname	TEXT NOT NULL,

@@ -51,6 +51,18 @@
 					required
 				/>
 			</div>
+			<div class="form-group">
+				<label for="bio">Bio</label>
+				<textarea
+					class="form-control rounded-0"
+					id="bio"
+					name="bio"
+					rows="3"
+					maxlength="255"
+				>
+				{{ user.bio }}</textarea
+				>
+			</div>
 			<div class="form-check">
 				{% if user.notifications %}
 				<input

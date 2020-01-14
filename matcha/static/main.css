@@ -13,6 +13,10 @@ h6 {
 	color: #444444;
 }
 
+li > a {
+	text-decoration: none !important;
+}
+
 nav {
 	margin-bottom: 2em;
 }
@@ -86,4 +90,26 @@ a.article-title:hover {
 
 .account-heading {
 	font-size: 2.5rem;
+}
+
+.addMoreButton {
+	margin: 0 0 1rem;
+}
+
+.addMore {
+	border: 1px solid #dee2e6;
+	padding: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+}
+
+.fameRating {
+	height: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
 }

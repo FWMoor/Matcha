@@ -6,7 +6,7 @@ from matcha.decorators import is_logged_in
 from matcha.db import db_connect, dict_factory
 
 users = Blueprint('users', __name__,
-				  template_folder='./templates', static_folder='static')
+				  template_folder='./templates', static_folder='../static')
 
 @users.route('/profile', defaults={'username': None})
 @users.route('/profile/<username>')
@@ -20,12 +20,18 @@ def profile(username):
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE username=?", [username])
 	result = cur.fetchone()
-	con.close()
 	if result:
+		cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
+		pics = cur.fetchall()
+		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
+		profile = cur.fetchone()
+		con.close()
+		image = profile.path if profile != None else 'default.jpeg'
+		image_file = url_for('static', filename='photos/' + image)
 		try:
 			if result['password']:
 				del result['password']
-			return render_template('profile.html', user=result, username=username)
+			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics))
 		except TemplateNotFound:
 			abort(404)
 	else:
@@ -45,7 +51,7 @@ def edit():
 			flash('Username or email already in use!', 'danger')
 			return redirect(url_for('users.edit'))
 		else:
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), notif, session['id']])
+			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('bio'), notif, session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
