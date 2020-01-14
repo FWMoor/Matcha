@@ -42,7 +42,7 @@ def joined(data):
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
-	cur.execute("""SELECT * FROM messages WHERE matchId=?""", [data['room']])
+	cur.execute("SELECT * FROM messages WHERE matchId=?", [data['room']])
 	result = cur.fetchall()
 	for item in result:
 		emit('update', item['message'], room=room)

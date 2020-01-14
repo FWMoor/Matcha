@@ -63,6 +63,7 @@ def setup_tables():
 		preference INTEGER NOT NULL DEFAULT 0,
 		tags TEXT,
 		location TEXT,
+		notifications INTERGER NOT NULL DEFAULT 1,
 		fame INTEGER NOT NULL DEFAULT 0,
 		online INTEGER NOT NULL DEFAULT 0,
 		lastonline TEXT

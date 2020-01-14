@@ -30,14 +30,12 @@ def register():
 		if error == 0:
 			uid = request.form['username'].lower()
 			email = request.form['email'].lower()
-			cur.execute(
-				"""SELECT * FROM users WHERE username=? OR email=?""", [uid, email])
+			cur.execute("SELECT * FROM users WHERE username=? OR email=?", [uid, email])
 			rows = cur.fetchall()
 			if not rows:
 				fname = request.form['fname']
 				lname = request.form['lname']
 				password = hash_password(request.form['password'])
-
 				cur.execute("INSERT INTO users (fname, lname, username, email, password) VALUES (?, ?, ?, ?, ?)",
 							[(fname), (lname), (uid), (email), (password)])
 				con.commit()
@@ -64,11 +62,9 @@ def login():
 		con = db_connect()
 		con.row_factory = dict_factory
 		cur = con.cursor()
-		cur.execute(
-			"""SELECT * FROM users WHERE email=? OR username=?""", [email, email])
+		cur.execute("SELECT * FROM users WHERE email=? OR username=?", [email, email])
 		result = cur.fetchone()
 		con.close()
-
 		if result:
 			if not verify_password(result['password'], password):
 				flash('Email or Password is wrong!', 'danger')
@@ -79,10 +75,11 @@ def login():
 				session['fname'] = result['fname']
 				session['lname'] = result['lname']
 				session['email'] = result['email']
+				session['id'] = result['id']
 				flash('Welcome back!', 'success')
 				return redirect(url_for('users.profile'))
 		else:
-			flash(f'Username or Email not found.', 'danger')
+			flash('Username or Email not found.', 'danger')
 			return redirect(url_for('auth.login'))
 	try:
 		return render_template('login.html')

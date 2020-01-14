@@ -1,19 +1,13 @@
 {% extends 'layout.html' %} {% block content %} {% if not username or
 session.username == username.lower() %}
 
-<h1>Profile</h1>
+<h1>Welcome {{session.username}}</h1>
 
-<h2>Welcome {{session.username}}</h2>
-
+<a class="btn btn-primary" href="{{ url_for('users.edit') }}" role="button"
+	>Edit</a
+>
 {% else %}
 
-<h1>Profile <small>{{username}}</small></h1>
+<h1>{{username}}</h1>
 
-{% endif %}
-
-<form action="" method="post">
-	<input type="text" name="location" id="location" />
-	<button type="submit">Save</button>
-</form>
-
-{% endblock %}
+{% endif %} {% endblock %}
