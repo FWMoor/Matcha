@@ -27,14 +27,20 @@
 				src="{{url_for('static', filename='photos/' + pic.path)}}"
 				class="img-fluid img-thumbnail"
 			/>
+			<a href="{{ './set/' ~ pic.id }}" class="btn btn-primary">Set AVI</a>
+			<a href="{{ './delete/' ~ pic.id }}" class="btn btn-danger">Delete</a>
 		</figure>
 		{% endfor %}
 		{% if amount < 5 and (not username or session.username == username.lower()) %}
-		<a href="#" class="col-md-4 addMoreButton">
+		<form action="" method="POST" enctype="multipart/form-data" class="col-md-4 addMoreButton">
+				<input type="file" name="picture" id="picture">
+				<button type="submit">Save Picture</button>
+		</form>
+		<!-- <a href="#" class="col-md-4 addMoreButton">
 			<figure class="addMore">
 				<span>Add Photo</span>
 			</figure>
-		</a>
+		</a> -->
 		{% endif %}
 	</div>
 	<!-- <form>
