@@ -1,25 +1,34 @@
 {% extends "layout.html" %} {% block content %}
-<div class="Users">
-	{% for User in Matches %}
-		<a href="#" onclick="SelectRoom({{ User['matchId'] }})">
-			<span>{{ User["username"] }}</span>
-		</a>
-	{% endfor %}
-</div>
 
-<div class="messages"></div>
-	<h1 class="RoomId">NONE</h1>
-<form class="Chatfrm" method="POST">
-	<input type="text" class="message" placeholder="Enter a message" />
+<p>
+	<div class="messages">Choose room on the right</div>
+</p>
+<form class="Chatfrm" id="Chatfrm" style="display: none;">
+	<input id="msg" type="text" class="message" placeholder="Enter a message" />
 	<input type="submit" value="send" />
 </form>
 
-<script
-	src="{{url_for('static', filename='js/socket.js')}}"
-	Content-Type="application/javascript"
-></script>
-<script
-	src="{{url_for('static', filename='js/location.js')}}"
-	Content-Type="application/javascript"
-></script>
+<!-- Submit form -->
+<script>
+	$('.Chatfrm').on('submit', (e) => {
+		e.preventDefault()
+			let message = $('input.message').val();
+			socket.emit('send', {'message': message});
+			$('input.message').val('').focus();
+	});
+</script>
+
+
+{% endblock %}
+
+{% block sidebar %}
+<div class="Users">
+	<p>
+		<ul class="list-group">
+			{% for User in Matches %}
+				<li class="list-group-item list-group-item-light"><a onclick="SelectRoom({{ User['id']}}, '{{ User["username"] }}')" class="text-primary">{{ User["username"] }}</a></li>
+			{% endfor %}
+		</ul>
+	</p>
+</div>
 {% endblock %}

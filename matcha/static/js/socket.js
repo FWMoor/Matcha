@@ -1,26 +1,32 @@
-// Connect socket
 var socket = io.connect('http://' + document.domain + ':' + location.port);
-var id = undefined
 
-function SelectRoom(_id)
+function SelectRoom(_roomid, username)
 {
-	socket.emit('join', {'room': _id});
+	socket.emit('getHistory', {'room': _roomid, 'username': username});
+	
+	$('#Chatfrm').css('display', 'inline-block')
 	$('div.messages').empty();
-	$('.RoomId').text(_id);
-	id = _id;
 }
 
-// Get update from server
-socket.on('update', (message) => {
-	$('div.messages').append(message + "<br/>");
-});
+socket.on('load', (data) => {
+	let message = ''
+	data.message.forEach((item) => {
+		if (item.senderId === data.id)
+			name = data.sender
+		else 
+			name = data.reciever
+		message += `<div class="message content-section">
+			<h5>@${name}</h5>
+			<p>${item.message}</p>
+			<span class="time-right">${item.time}</span>
+			</div>`
+	})
+	$('div.messages').append(message)
+	$('div.messages').scrollTop($('div.messages')[0].scrollHeight);
+})
 
-// If send a chat
-$('.Chatfrm').on('submit', (e) => {
-	e.preventDefault()
-		let message = $('input.message').val();
-		// clear message box
-		socket.emit('send', {'message': message, 'room': id});
-		$('input.message').val('').focus();
+socket.on('update', (data) => {
+	message = data.message
+	$('div.messages').append(message)
+	$('div.messages').scrollTop($('div.messages')[0].scrollHeight);
 });
-
