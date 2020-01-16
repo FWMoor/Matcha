@@ -11,24 +11,23 @@
 			</div>
 		</div>
 	</div>
-</div>
-
-<div class="content-section">
-	<legend class="border-bottom mb-4">Bio</legend>
-	{% if user.bio %}
-	<span style="word-break: break-word;">{{ user.bio }}</span>
-	{% else %}
-	<span style="word-break: break-word;">No bio given</span>
-	{% endif %}
-</div>
-
-<div class="content-section">
-	<legend class="border-bottom mb-4">Tags</legend>
-	{% if not user.preference %}
-	<span style="word-break: break-word;">Placeholder for preferences</span>
-	{% else %}
-	<span style="word-break: break-word;">No tags chosen</span>
-	{% endif %}
+	<div>
+		<legend class="border-bottom mb-4">Bio</legend>
+		{% if user.bio %}
+		<span style="word-break: break-word;">{{ user.bio }}</span>
+		{% else %}
+		<span style="word-break: break-word;">No bio given</span>
+		{% endif %}
+	</div>
+	<br>
+	<div>
+		<legend class="border-bottom mb-4">Tags</legend>
+		{% if not user.preference %}
+		<span style="word-break: break-word;">No tags chosen</span>
+		{% else %}
+		<span style="word-break: break-word;">{{ user.tags }}</span>
+		{% endif %}
+	</div>
 </div>
 
 <div class="content-section">
@@ -61,33 +60,9 @@
 						myForm.submit();
 				});
 		</script>
-		<!-- <a href="#" class="col-md-4 addMoreButton">
-			<figure class="addMore">
-				<span>Add Photo</span>
-			</figure>
-		</a> -->
 		{% endif %}
 	</div>
-	<!-- <form>
-		<div class="custom-file">
-			<input type="file" class="custom-file-input" id="customFile">
-			<label class="custom-file-label" for="customFile">Choose file<label>
-		</div>
-	</form> -->
 </div>
-
-<!-- <script>
-	$(".custom-file-input").on("change", function() {
-		var fileName = $(this)
-			.val()
-			.split("\\")
-			.pop();
-		$(this)
-			.siblings(".custom-file-label")
-			.addClass("selected")
-			.html(fileName);
-	});
-</script> -->
 
 {% endblock %}
 
