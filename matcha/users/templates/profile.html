@@ -32,10 +32,21 @@
 		</figure>
 		{% endfor %}
 		{% if amount < 5 and (not username or session.username == username.lower()) %}
-		<form action="" method="POST" enctype="multipart/form-data" class="col-md-4 addMoreButton">
+		<form id="PhotoForm" action="" method="POST" enctype="multipart/form-data" class="col-md-4 addMoreButton">
 				<input type="file" name="picture" id="picture">
-				<button type="submit">Save Picture</button>
+				<!-- <button type="submit">Save Picture</button> -->
 		</form>
+		<script>
+			// Auto upload
+			function chooseFile() {
+			$("#fileInput").click();
+				}
+				var picture = document.getElementById('picture')
+				picture.addEventListener('change',() => {
+						var myForm = document.getElementById("PhotoForm")
+						myForm.submit();
+				});
+		</script>
 		<!-- <a href="#" class="col-md-4 addMoreButton">
 			<figure class="addMore">
 				<span>Add Photo</span>
