@@ -196,8 +196,10 @@ def block_user(userId):
 	if result:
 		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
 		con.commit()
+		flash('User has been unblocked!', 'success')
 	else:
 		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
 		con.commit()
+		flash('User has been blocked!', 'success')
 	con.close()
 	return redirect(url_for('users.profile', username=user[3]))
