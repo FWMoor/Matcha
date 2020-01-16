@@ -68,18 +68,27 @@ def profile(username):
 		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
 		profile = cur.fetchone()
 		blocked = 0
+		liked = 0
+		matched = 0
 		if (username != session['username']):
 			cur.execute("SELECT * FROM blocked WHERE userId=? AND blockedId=?", [session['id'], result['id']])
 			block = cur.fetchone()
 			blocked = 1 if block != None else 0
-			print(block)
+			cur.execute("SELECT * FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], result['id'], result['id'], session['id']])
+			match = cur.fetchone()
+			if match:
+				matched = 1
+			else:
+				cur.execute("SELECT * FROM likes WHERE user1=? AND user2=?", [session['id'], result['id']])
+				like = cur.fetchone()
+				liked = 1 if like != None else 0
 		con.close()
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
 		try:
 			if result['password']:
 				del result['password']
-			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked)
+			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched)
 		except TemplateNotFound:
 			abort(404)
 	else:
@@ -195,11 +204,56 @@ def block_user(userId):
 	result = cur.fetchone()
 	if result:
 		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
-		con.commit()
 		flash('User has been unblocked!', 'success')
 	else:
 		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
-		con.commit()
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
 		flash('User has been blocked!', 'success')
+	con.commit()
+	con.close()
+	return redirect(url_for('users.profile', username=user[3]))
+
+@users.route('/profile/like/<userId>')
+@is_logged_in
+def like_user(userId):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id=?", [userId])
+	user = cur.fetchone()
+	cur.execute("SELECT * FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+	result = cur.fetchone()
+	if result:
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+		flash('User has been unliked!', 'success')
+	else:
+		cur.execute("INSERT INTO likes (user1, user2) VALUES (?, ?)", [session['id'], userId])
+		con.commit()
+		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		matched = cur.fetchall()
+		if len(matched) == 2:
+			cur.execute("INSERT INTO matches (user1, user2) VALUES (?, ?)", [session['id'], userId])
+			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+			flash('You made a match!', 'success')
+		else:
+			flash('User has been liked!', 'success')
+	con.commit()
+	con.close()
+	return redirect(url_for('users.profile', username=user[3]))
+
+@users.route('/profile/match/<userId>')
+@is_logged_in
+def match_user(userId):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id=?", [userId])
+	user = cur.fetchone()
+	cur.execute("SELECT * FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+	result = cur.fetchone()
+	if result:
+		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		con.commit()
+		flash('You unmatched from user!', 'success')
+	else:
+		flash('Match not found!', 'success')
 	con.close()
 	return redirect(url_for('users.profile', username=user[3]))

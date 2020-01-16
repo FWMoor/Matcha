@@ -22,7 +22,11 @@ def setup_tables():
 	);""")
 	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS matches (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user1	INTEGER NOT NULL,
+		user2	INTEGER NOT NULL
+	);""")
+	con.commit()
+	cur.execute("""CREATE TABLE IF NOT EXISTS likes (
 		user1	INTEGER NOT NULL,
 		user2	INTEGER NOT NULL
 	);""")

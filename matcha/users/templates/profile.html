@@ -83,7 +83,15 @@
 	</p>
 	{% else %}
 	<hr>
-	<a class="btn btn-primary" href="#" role="button">Match</a>
+		{% if matched == 1%}
+		<a class="btn btn-primary" href="{{ './match/' ~ user.id }}" role="button">Unmatch</a>
+		{% else %}
+			{% if liked == 1%}
+			<a class="btn btn-primary" href="{{ './like/' ~ user.id }}" role="button">Unlike</a>
+			{% else %}
+			<a class="btn btn-primary" href="{{ './like/' ~ user.id }}" role="button">Like</a>
+			{% endif %}
+		{% endif %}
 		{% if blocked == 1 %}
 		<a class="btn btn-danger" href="{{ './block/' ~ user.id }}" role="button">Unblock</a>
 		{% else %}
