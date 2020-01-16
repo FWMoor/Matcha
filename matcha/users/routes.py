@@ -13,6 +13,13 @@ ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
 users = Blueprint('users', __name__,
 				  template_folder='./templates', static_folder='../static')
 
+def get_id_from_username(username):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE username=?", [username])
+	user = cur.fetchone()
+	return user[3]
+
 def save_picture(form_picture):
 	random_hex = secrets.token_hex(8)
 	_, f_ext = os.path.splitext(form_picture.filename)
@@ -38,6 +45,11 @@ def profile(username):
 	cur.execute("SELECT * FROM users WHERE username=?", [username])
 	result = cur.fetchone()
 	if result:
+		if username != session['username']:
+			cur.execute("SELECT * FROM blocked WHERE userId=? AND blockedId=?", [result['id'], session['id']])
+			isblocked = cur.fetchone()
+			if isblocked:
+				abort(404)
 		if request.method == 'POST':
 			cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
 			tot = cur.fetchall()
@@ -55,13 +67,19 @@ def profile(username):
 		pics = cur.fetchall()
 		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
 		profile = cur.fetchone()
+		blocked = 0
+		if (username != session['username']):
+			cur.execute("SELECT * FROM blocked WHERE userId=? AND blockedId=?", [session['id'], result['id']])
+			block = cur.fetchone()
+			blocked = 1 if block != None else 0
+			print(block)
 		con.close()
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
 		try:
 			if result['password']:
 				del result['password']
-			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics))
+			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked)
 		except TemplateNotFound:
 			abort(404)
 	else:
@@ -156,7 +174,7 @@ def set_pic(photoId):
 	cur = con.cursor()
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
-	if (result):
+	if result:
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND profile=?", [0, session['id'], 1])
 		con.commit()
 		cur.execute("UPDATE photos SET profile=? WHERE id=? AND userId=?", [1, photoId, session['id']])
@@ -165,3 +183,21 @@ def set_pic(photoId):
 		flash('Couldn\'t update profile picture!', 'danger')
 	con.close()
 	return redirect(url_for('users.profile'))
+
+@users.route('/profile/block/<userId>')
+@is_logged_in
+def block_user(userId):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id=?", [userId])
+	user = cur.fetchone()
+	cur.execute("SELECT * FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
+	result = cur.fetchone()
+	if result:
+		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
+		con.commit()
+	else:
+		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
+		con.commit()
+	con.close()
+	return redirect(url_for('users.profile', username=user[3]))

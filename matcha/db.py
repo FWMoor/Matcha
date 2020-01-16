@@ -17,7 +17,6 @@ def setup_tables():
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("""CREATE TABLE IF NOT EXISTS blocked (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		userId INTEGER NOT NULL,
 		blockedId	INTEGER NOT NULL
 	);""")

@@ -98,7 +98,11 @@
 	{% else %}
 	<hr>
 	<a class="btn btn-primary" href="#" role="button">Match</a>
-	<a class="btn btn-danger" href="#" role="button">Report</a>
+		{% if blocked == 1 %}
+		<a class="btn btn-danger" href="{{ './block/' ~ user.id }}" role="button">Unblock</a>
+		{% else %}
+		<a class="btn btn-danger" href="{{ './block/' ~ user.id }}" role="button">Block</a>
+		{% endif %}
 	{% endif %}
 </div>
 
