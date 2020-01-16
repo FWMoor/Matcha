@@ -13,11 +13,30 @@ ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
 users = Blueprint('users', __name__,
 				  template_folder='./templates', static_folder='../static')
 
+def update_fame_rating(id):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("SELECT * FROM likes WHERE user2=?", [id])
+	like = cur.fetchall()
+	likes = len(like)
+	cur.execute("SELECT * FROM matches WHERE user2=?", [id])
+	match = cur.fetchall()
+	matches = len(match)
+	cur.execute("SELECT * FROM users WHERE NOT id=?", [id])
+	tot = cur.fetchall()
+	total = len(tot)
+	fame = (likes + matches) / total * 5
+	cur.execute("UPDATE users SET fame=? WHERE id=?", [round(fame, 1), id])
+	con.commit()
+	con.close()
+	return likes + matches
+
 def get_id_from_username(username):
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE username=?", [username])
 	user = cur.fetchone()
+	con.close()
 	return user[3]
 
 def save_picture(form_picture):
@@ -88,6 +107,7 @@ def profile(username):
 		try:
 			if result['password']:
 				del result['password']
+			update_fame_rating(result['id'])
 			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched)
 		except TemplateNotFound:
 			abort(404)
@@ -239,6 +259,7 @@ def like_user(userId):
 			flash('User has been liked!', 'success')
 	con.commit()
 	con.close()
+	update_fame_rating(userId)
 	return redirect(url_for('users.profile', username=user[3]))
 
 @users.route('/profile/match/<userId>')
@@ -257,4 +278,5 @@ def match_user(userId):
 	else:
 		flash('Match not found!', 'success')
 	con.close()
+	update_fame_rating(userId)
 	return redirect(url_for('users.profile', username=user[3]))
