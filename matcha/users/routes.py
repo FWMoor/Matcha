@@ -227,6 +227,7 @@ def like_user(userId):
 		flash('User has been unliked!', 'success')
 	else:
 		cur.execute("INSERT INTO likes (user1, user2) VALUES (?, ?)", [session['id'], userId])
+		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
 		con.commit()
 		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
 		matched = cur.fetchall()
