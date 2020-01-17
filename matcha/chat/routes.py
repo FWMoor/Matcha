@@ -73,19 +73,28 @@ def getHistory(data):
 			"id": session['id']
 	}
 	emit('load', JSON, json=True)
-	join_room(session['room'])
+# 	join_room(session['room'])
 
-@socketio.on('join')
-def joined():
-	if (session.get('room')):
-		leave_room(session['room'])
-	join_room(session['room'])
+# @socketio.on('join')
+# def joined():
+# 	if (session.get('room')):
+# 		leave_room(session['room'])
+# 	join_room(session['room'])
+
+@socketio.on('connect')
+def connect_all():
+	Matches=getMatches(session['id'])
+	for match in Matches:
+		join_room(str(match['id']))
 
 @socketio.on('send')
 def message(data):
 	if (session.get('room')):
 		date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-		receiveId = getReciever(session['room'], session['id'])['id']
+		receive = getReciever(session['room'], session['id'])
+		receiveId = receive['id']
+		receiver = receive['username']
+
 		msg = escape(data['message'])
 		if not msg.isspace():
 			insertMessage([session['room'], session['id'], receiveId, msg, date_time])
@@ -96,5 +105,5 @@ def message(data):
 				<span class="time-right">{}</span>
 			</div>
 			<br>""".format(session['username'], msg,date_time)
-			JSON = {"message": message}
+			JSON = {"message": message, "room": receiver, "rawmsg": msg, "roomname": session['username']}
 			emit('update',JSON, room=session['room'], json=True)
