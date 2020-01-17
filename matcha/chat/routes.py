@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, flash, redirect, url_for
+from flask import Blueprint, render_template, session, flash, redirect, url_for, abort
 from matcha.decorators import not_logged_in, is_logged_in
 from flask_socketio import join_room, leave_room, send, emit
 from matcha.db import db_connect, dict_factory
@@ -13,7 +13,10 @@ chat = Blueprint('chat', __name__,
 @chat.route('/')
 @is_logged_in
 def sessions():
-	return render_template('chat.html', Matches=getMatches(session['id']), title="Chat")
+	try:
+		return render_template('chat.html', Matches=getMatches(), title="Chat")
+	except:
+		abort(500)
 
 def escape(s, quote=True):
 	s = s.replace("&", "&amp;") # Must be done first!
@@ -24,15 +27,19 @@ def escape(s, quote=True):
 		s = s.replace('\'', "&#x27;")
 	return s
 
-def getMatches(id):
+def getMatches():
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
-	cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ?
+	if session.get('id') is not None:
+		id = session['id']
+		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ?
 		UNION
 		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ?""", [id,id])
-	result = cur.fetchall()
-	con.close()
+		result = cur.fetchall()
+		con.close()
+	else:
+		return None
 	return result
 
 def getMessages(room):
@@ -73,19 +80,13 @@ def getHistory(data):
 			"id": session['id']
 	}
 	emit('load', JSON, json=True)
-# 	join_room(session['room'])
-
-# @socketio.on('join')
-# def joined():
-# 	if (session.get('room')):
-# 		leave_room(session['room'])
-# 	join_room(session['room'])
 
 @socketio.on('connect')
 def connect_all():
-	Matches=getMatches(session['id'])
-	for match in Matches:
-		join_room(str(match['id']))
+	Matches=getMatches()
+	if Matches is not None:
+		for match in Matches:
+			join_room(str(match['id']))
 
 @socketio.on('send')
 def message(data):
