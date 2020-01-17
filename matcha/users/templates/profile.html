@@ -83,6 +83,14 @@
 	</p>
 	{% else %}
 	<hr>
+		{% if user.lastonline == "now" %}
+		<span>Online now</span>
+		<br>
+		{% elif user.lastonline %}
+		<span>Last online: {{ user.lastonline }}</span>
+		<br>
+		{% endif %}
+
 		{% if matched == 1%}
 		<a class="btn btn-primary" href="{{ './match/' ~ user.id }}" role="button">Unmatch</a>
 		{% else %}

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, request, flash, redirect, session, abort
 import re
 from jinja2 import TemplateNotFound
+from datetime import datetime
 
 from matcha.auth.utils import hash_password, verify_password
 from matcha.decorators import not_logged_in, is_logged_in
@@ -75,7 +76,6 @@ def login():
 		cur = con.cursor()
 		cur.execute('SELECT * FROM users WHERE email=? OR username=?', [email, email])
 		result = cur.fetchone()
-		con.close()
 		if result:
 			if result['verify']:
 				flash('Account not verified!', 'danger')
@@ -91,9 +91,13 @@ def login():
 				session['email'] = result['email']
 				session['id'] = result['id']
 				flash('Welcome back!', 'success')
+				cur.execute("UPDATE users SET lastonline=? WHERE id=?", ["now", session['id']])
+				con.commit()
+				con.close()
 				return redirect(url_for('users.profile'))
 		else:
 			flash('Username or Email not found.', 'danger')
+			con.close()
 			return redirect(url_for('auth.login'))
 	try:
 		return render_template('login.html')
@@ -104,6 +108,12 @@ def login():
 @auth.route('/logout')
 @is_logged_in
 def logout():
+	con = db_connect()
+	cur = con.cursor()
+	date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+	cur.execute("UPDATE users SET lastonline=? WHERE id=?", [date_time, session['id']])
+	con.commit()
+	con.close()
 	session.clear()
 	flash('Logout was successfull', 'success')
 	return redirect(url_for('auth.login'))
