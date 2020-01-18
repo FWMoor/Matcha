@@ -89,6 +89,9 @@
 		{% elif user.lastonline %}
 		<span>Last online: {{ user.lastonline }}</span>
 		<br>
+		{% else %}
+		<span>Offline</span>
+		<br>
 		{% endif %}
 
 		{% if matched == 1%}
