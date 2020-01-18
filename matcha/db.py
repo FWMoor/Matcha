@@ -48,11 +48,6 @@ def setup_tables():
 		notification TEXT NOT NULL
 	);""")
 	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS preferences (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		preference TEXT NOT NULL
-	);""")
-	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS photos (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		userId INTEGER NOT NULL,
@@ -69,9 +64,9 @@ def setup_tables():
 		password TEXT NOT NULL,
 		verify TEXT,
 		banned INTEGER NOT NULL DEFAULT 0,
-		gender INTEGER NOT NULL DEFAULT 0,
+		gender TEXT,
 		bio TEXT,
-		preference INTEGER NOT NULL DEFAULT 0,
+		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
 		location TEXT,
 		notifications INTERGER NOT NULL DEFAULT 1,

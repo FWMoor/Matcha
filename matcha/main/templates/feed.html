@@ -4,8 +4,11 @@
 
 <ul>
 	{% for user in users %}
-
-	<li>{{ user.username }}</li>
+	<li>
+		<a href="{{ url_for('users.profile', username=user.username) }}"
+			>{{ user.username }}</a
+		>
+	</li>
 
 	{% endfor %}
 </ul>

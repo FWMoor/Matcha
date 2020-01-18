@@ -51,6 +51,50 @@
 					required
 				/>
 			</div>
+			<div class="form-row align-items-center">
+				<div class="col-auto my-1">
+					<label class="mr-sm-2" for="gender">Gender</label>
+					<select
+						class="custom-select mr-sm-2 form-control form-control-lg"
+						id="gender"
+						name="gender"
+					>
+						{% if user.gender %} {% if user.gender == 'M' %}
+						<option selected hidden value="M">Male</option>
+						{% elif user.gender == 'F' %}
+						<option selected hidden value="F">Female</option>
+						{% else %}
+						<option selected hidden value="O">Other</option>
+						{% endif %} {% else %}
+						<option disabled selected hidden>Choose...</option>
+						{% endif %}
+						<option value="M">Male</option>
+						<option value="F">Female</option>
+						<option value="O">Other</option>
+					</select>
+				</div>
+				<div class="col-auto my-1">
+					<label class="mr-sm-2" for="gender">Sexuality</label>
+					<select
+						class="custom-select mr-sm-2 form-control form-control-lg"
+						id="sexuality"
+						name="sexuality"
+					>
+						{% if user.sexuality %} {% if user.sexuality == 'S' %}
+						<option selected hidden value="S">Heterosexual</option>
+						{% elif user.sexuality == 'G' %}
+						<option selected hidden value="G">Homosexual</option>
+						{% else %}
+						<option selected hidden value="B">Bisexual</option>
+						{% endif %} {% else %}
+						<option disabled selected hidden>Choose...</option>
+						{% endif %}
+						<option value="S">Heterosexual</option>
+						<option value="G">Homosexual</option>
+						<option value="B">Bisexual</option>
+					</select>
+				</div>
+			</div>
 			<div class="form-group">
 				<label for="bio">Bio</label>
 				<textarea

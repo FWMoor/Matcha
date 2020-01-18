@@ -21,12 +21,36 @@
 	</div>
 	<br>
 	<div>
-		<legend class="border-bottom mb-4">Tags</legend>
-		{% if not user.preference %}
-		<span style="word-break: break-word;">No tags chosen</span>
-		{% else %}
-		<span style="word-break: break-word;">{{ user.tags }}</span>
-		{% endif %}
+		<legend class="border-bottom mb-4">Info</legend>
+		<div>
+			<p class="info-heads"><b>Gender:</b></p>
+			{% if not user.gender %}
+			<span style="word-break: break-word;">No gender provided</span>
+			{% else %}
+				{% if user.gender == 'M' %}
+				<span style="word-break: break-word;">Male</span>
+				{% elif user.gender == 'F' %}
+				<span style="word-break: break-word;">Female</span>
+				{% else %}
+				<span style="word-break: break-word;">Other</span>
+				{% endif %}
+			{% endif %}
+		</div>
+		<br>
+		<div>
+			<p class="info-heads"><b>Sexuality:</b></p>
+			{% if not user.sexuality %}
+			<span style="word-break: break-word;">No sexuality provided</span>
+			{% else %}
+				{% if user.sexuality == 'S' %}
+				<span style="word-break: break-word;">Heterosexual</span>
+				{% elif user.sexuality == 'G' %}
+				<span style="word-break: break-word;">Homosexual</span>
+				{% else %}
+				<span style="word-break: break-word;">Bisexual</span>
+				{% endif %}
+			{% endif %}
+		</div>
 	</div>
 </div>
 

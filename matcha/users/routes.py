@@ -25,7 +25,10 @@ def update_fame_rating(id):
 	cur.execute("SELECT * FROM users WHERE NOT id=?", [id])
 	tot = cur.fetchall()
 	total = len(tot)
-	fame = (likes + matches) / total * 5
+	if (total > 0):
+		fame = (likes + matches) / total * 5
+	else:
+		fame = 0
 	cur.execute("UPDATE users SET fame=? WHERE id=?", [round(fame, 1), id])
 	con.commit()
 	con.close()
@@ -33,11 +36,12 @@ def update_fame_rating(id):
 
 def get_id_from_username(username):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE username=?", [username])
 	user = cur.fetchone()
 	con.close()
-	return user[3]
+	return user['username']
 
 def save_picture(form_picture):
 	random_hex = secrets.token_hex(8)
@@ -128,7 +132,7 @@ def edit():
 			flash('Username or email already in use!', 'danger')
 			return redirect(url_for('users.edit'))
 		else:
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('bio'), notif, session['id']])
+			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, sexuality=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), request.form.get('sexuality'), request.form.get('bio'), notif, session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
