@@ -38,7 +38,8 @@ def setup_tables():
 		senderId INTEGER NOT NULL,
 		receiveId	INTEGER NOT NULL,
 		message TEXT NOT NULL,
-		time TEXT NOT NULL
+		time TEXT NOT NULL,
+		seen INTEGER DEFAULT 0
 	);""")
 	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS notifications (
