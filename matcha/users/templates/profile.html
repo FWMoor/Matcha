@@ -23,6 +23,15 @@
 	<div>
 		<legend class="border-bottom mb-4">Info</legend>
 		<div>
+			<p class="info-heads"><b>Age:</b></p>
+			{% if age > 0 %}
+			<span style="word-break: break-word;">{{ age }} Years old</span>
+			{% else %}
+			<span style="word-break: break-word;">No age specified</span>
+			{% endif %}
+		</div>
+		<br>
+		<div>
 			<p class="info-heads"><b>Gender:</b></p>
 			{% if not user.gender %}
 			<span style="word-break: break-word;">No gender provided</span>
