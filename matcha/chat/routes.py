@@ -98,6 +98,16 @@ def setseen(id, room):
 	con.commit()
 	con.close()
 
+def setCords(lng, lat, id):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute(
+	"""	UPDATE users SET lngCord = ?, latCord = ?
+		WHERE id = ?""",
+		[lng, lat, id])
+	con.commit()
+	con.close()
+
 @socketio.on('getHistory')
 def getHistory(data):
 	session['room'] = str(data['room'])
@@ -171,3 +181,9 @@ def sysmsg(data):
 		<br>""".format(session['username'], msg,date_time)
 		JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
 		emit('update',JSON,room=str(room), json=True, namespace = '/')
+
+@socketio.on('location')
+def location(data):
+	print(session['username'] + " location data:")
+	print(data)
+	setCords(data['lng'], data['lat'], session['id'])

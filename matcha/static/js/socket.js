@@ -31,6 +31,7 @@ socket.on('update', (data) => {
 });
 
 
+// Notifications
 function setpermission()
 {
 	if (!("Notification" in window)) {
