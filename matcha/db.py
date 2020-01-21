@@ -73,7 +73,9 @@ def setup_tables():
 		notifications INTERGER NOT NULL DEFAULT 1,
 		fame INTEGER NOT NULL DEFAULT 0,
 		online INTEGER NOT NULL DEFAULT 0,
-		lastonline TEXT
-	);""")
+		lastonline TEXT,
+		birthdate TEXT,
+		passreset TEXT
+		);""")
 	con.commit()
 	con.close()
