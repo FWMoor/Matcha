@@ -129,18 +129,18 @@
 		{% endif %}
 
 		{% if matched == 1%}
-		<a class="btn btn-primary" href="{{ './match/' ~ user.id }}" role="button">Unmatch</a>
+		<a class="btn btn-primary" href="{{ url_for('users.match_user', userId=user.id) }}" role="button">Unmatch</a>
 		{% else %}
 			{% if liked == 1%}
-			<a class="btn btn-primary" href="{{ './like/' ~ user.id }}" role="button">Unlike</a>
+			<a class="btn btn-primary" href="{{ url_for('users.like_user', userId=user.id) }}" role="button">Unlike</a>
 			{% else %}
-			<a class="btn btn-primary" href="{{ './like/' ~ user.id }}" role="button">Like</a>
+			<a class="btn btn-primary" href="{{ url_for('users.like_user', userId=user.id) }}" role="button">Like</a>
 			{% endif %}
 		{% endif %}
 		{% if blocked == 1 %}
-		<a class="btn btn-danger" href="{{ './block/' ~ user.id }}" role="button">Unblock</a>
+		<a class="btn btn-danger" href="{{ url_for('users.block_user', userId=user.id) }}" role="button">Unblock</a>
 		{% else %}
-		<a class="btn btn-danger" href="{{ './block/' ~ user.id }}" role="button">Block</a>
+		<a class="btn btn-danger" href="{{ url_for('users.block_user', userId=user.id) }}" role="button">Block</a>
 		{% endif %}
 	{% endif %}
 </div>
