@@ -62,6 +62,24 @@ def getReciever(room, id):
 	con.close()
 	return result
 
+def getusernamebyid(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id = ? ", [id])
+	result = cur.fetchone()
+	con.close()
+	return result
+
+def getroombyuserids(id1, id2):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT id FROM matches WHERE user1 = ? AND user2 = ?", [id1, id2])
+	result = cur.fetchone()
+	con.close()
+	return result
+
 def insertMessage(arr):
 	con = db_connect()
 	cur = con.cursor()
@@ -111,8 +129,9 @@ def getHistory(data):
 
 @socketio.on('connect')
 def connect_all():
+	if (not session.get('room')):
+		session['room'] = None
 	Matches=getMatches()
-	print('JOIN ROOM')
 	if Matches is not None:
 		for match in Matches:
 			join_room(str(match['id']))
@@ -133,4 +152,22 @@ def message(data):
 			</div>
 			<br>""".format(session['username'], msg,date_time)
 			JSON = {"message": message, "rawmsg": msg, "roomname": session['room'], "sender": session['username']}
-			emit('update',JSON, room=session['room'], json=True)
+			emit('update',JSON,room=session['room'], json=True)
+
+def sysmsg(data):
+	date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+	username = getusernamebyid(data['id'])
+	msg = escape(data['message'])
+	room = getroombyuserids(1, data['id'])['id']
+	# print(room)
+	if not msg.isspace():
+		insertMessage([room, 1, data['id'], msg, date_time])
+		message = """
+		<div class="message content-section">
+			<h5>@{}</h5>
+			<p>{}</p>
+			<span class="time-right">{}</span>
+		</div>
+		<br>""".format(session['username'], msg,date_time)
+		JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
+		emit('update',JSON,room=str(room), json=True, namespace = '/')

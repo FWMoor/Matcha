@@ -23,6 +23,15 @@
 	<div>
 		<legend class="border-bottom mb-4">Info</legend>
 		<div>
+			<p class="info-heads"><b>Age:</b></p>
+			{% if age > 0 %}
+			<span style="word-break: break-word;">{{ age }} Years old</span>
+			{% else %}
+			<span style="word-break: break-word;">No age specified</span>
+			{% endif %}
+		</div>
+		<br>
+		<div>
 			<p class="info-heads"><b>Gender:</b></p>
 			{% if not user.gender %}
 			<span style="word-break: break-word;">No gender provided</span>
@@ -64,8 +73,8 @@
 				src="{{url_for('static', filename='photos/' + pic.path)}}"
 				class="img-fluid img-thumbnail"
 			/>
-			<a href="{{ './set/' ~ pic.id }}" class="btn btn-primary">Set AVI</a>
-			<a href="{{ './delete/' ~ pic.id }}" class="btn btn-danger">Delete</a>
+			<a href="{{ url_for('users.set_pic', photoId=pic.id) }}" class="btn btn-primary">Set AVI</a>
+			<a href="{{ url_for('users.delete_pic', photoId=pic.id) }}" class="btn btn-danger">Delete</a>
 		</figure>
 		{% endfor %}
 		{% if amount < 5 and (not username or session.username == username.lower()) %}

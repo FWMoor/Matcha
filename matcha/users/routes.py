@@ -1,8 +1,12 @@
 from flask import Blueprint, render_template, url_for, request, flash, redirect, session, abort
 from jinja2 import TemplateNotFound
+from datetime import date 
 
 import secrets
 import os
+
+#For sys notifications
+from matcha.chat.routes import sysmsg
 
 from matcha.auth.utils import hash_password
 from matcha.decorators import is_logged_in
@@ -12,6 +16,10 @@ ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
 
 users = Blueprint('users', __name__,
 				  template_folder='./templates', static_folder='../static')
+def get_age(birthDate):
+	today = date.today()
+	age = today.year - birthDate.year - ((today.month, today.day) < (birthDate.month, birthDate.day))
+	return age
 
 def update_fame_rating(id):
 	con = db_connect()
@@ -112,7 +120,12 @@ def profile(username):
 			if result['password']:
 				del result['password']
 			update_fame_rating(result['id'])
-			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched)
+			if result['birthdate']:
+				data = result['birthdate'].split("-")
+				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
+			else:
+				age = 0
+			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age)
 		except TemplateNotFound:
 			abort(404)
 	else:
@@ -132,7 +145,7 @@ def edit():
 			flash('Username or email already in use!', 'danger')
 			return redirect(url_for('users.edit'))
 		else:
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, sexuality=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), request.form.get('sexuality'), request.form.get('bio'), notif, session['id']])
+			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, sexuality=?, birthdate=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), notif, session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
@@ -228,14 +241,22 @@ def block_user(userId):
 	result = cur.fetchone()
 	if result:
 		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
+		con.commit()
+		con.close()
+		data = {'id': userId, "message":session['username'] + " unblocked you"}
+		sysmsg(data)
 		flash('User has been unblocked!', 'success')
 	else:
 		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
 		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+		# set system msg if blocked
+		con.commit()
+		con.close()
+		data = {'id': userId, "message":session['username'] + " blocked you"}
+		sysmsg(data)
 		flash('User has been blocked!', 'success')
-	con.commit()
-	con.close()
 	return redirect(url_for('users.profile', username=user[3]))
+
 
 @users.route('/profile/like/<userId>')
 @is_logged_in
@@ -249,6 +270,11 @@ def like_user(userId):
 	if result:
 		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
 		flash('User has been unliked!', 'success')
+		# set system message if unliked
+		con.commit()
+		con.close()
+		data = {'id': userId, "message":session['username'] + " unliked you"}
+		sysmsg(data)
 	else:
 		cur.execute("INSERT INTO likes (user1, user2) VALUES (?, ?)", [session['id'], userId])
 		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
@@ -258,11 +284,19 @@ def like_user(userId):
 		if len(matched) == 2:
 			cur.execute("INSERT INTO matches (user1, user2) VALUES (?, ?)", [session['id'], userId])
 			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+			# set system message if matched
+			con.commit()
+			con.close()
+			data = {'id': userId, "message":session['username'] + " matched with you"}
+			sysmsg(data)
 			flash('You made a match!', 'success')
 		else:
+			# set system message if matched
+			con.commit()
+			con.close()
+			data = {'id': userId, "message":session['username'] + " liked you"}
+			sysmsg(data)
 			flash('User has been liked!', 'success')
-	con.commit()
-	con.close()
 	update_fame_rating(userId)
 	return redirect(url_for('users.profile', username=user[3]))
 
@@ -278,9 +312,12 @@ def match_user(userId):
 	if result:
 		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
 		con.commit()
+		con.close()
+		data = {'id': userId, "message":session['username'] + " unmatched you"}
+		sysmsg(data)
 		flash('You unmatched from user!', 'success')
 	else:
 		flash('Match not found!', 'success')
-	con.close()
+		con.close()
 	update_fame_rating(userId)
 	return redirect(url_for('users.profile', username=user[3]))

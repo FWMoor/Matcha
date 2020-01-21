@@ -1,0 +1,34 @@
+{% extends "layout.html" %} {% block content %}
+
+<div class="content-section">
+	<form action="" method="POST">
+		<fieldset class="form-group">
+			<legend class="border-bottom mb-4">Forgot Password</legend>
+			<div class="form-group">
+				<label for="email" class="form-control-label">Email</label>
+				<input
+					type="text"
+					name="email"
+					id="email"
+					class="form-control form-control-lg"
+					required
+				/>
+			</div>
+		</fieldset>
+		<div class="form-group">
+			<button type="submit" class="btn btn-outline-primary">
+				Reset
+			</button>
+		</div>
+	</form>
+	<div class="border-top pt-3">
+		<small class="text-muted">
+			Remember password?
+			<a class="ml-2 text-primary" href="{{ url_for('auth.login') }}"
+				>Login instead</a
+			>
+		</small>
+	</div>
+</div>
+
+{% endblock content %}

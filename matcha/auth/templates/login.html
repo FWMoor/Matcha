@@ -41,7 +41,9 @@
 		<div class="form-group d-flex justify-content-between">
 			<button type="submit" class="btn btn-outline-primary">Login</button>
 			<small class="align-self-center"
-				><a href="#" class="text-primary">Forgot Password?</a></small
+				><a href="{{ url_for('auth.forget') }}" class="text-primary"
+					>Forgot Password?</a
+				></small
 			>
 		</div>
 	</form>
