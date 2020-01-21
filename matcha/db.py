@@ -38,7 +38,8 @@ def setup_tables():
 		senderId INTEGER NOT NULL,
 		receiveId	INTEGER NOT NULL,
 		message TEXT NOT NULL,
-		time TEXT NOT NULL
+		time TEXT NOT NULL,
+		seen INTEGER DEFAULT 0
 	);""")
 	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS notifications (
@@ -63,10 +64,8 @@ def setup_tables():
 		email	TEXT NOT NULL,
 		password TEXT NOT NULL,
 		verify TEXT,
-		passreset TEXT,
 		banned INTEGER NOT NULL DEFAULT 0,
 		gender TEXT,
-		birthdate TEXT,
 		bio TEXT,
 		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
@@ -74,7 +73,9 @@ def setup_tables():
 		notifications INTERGER NOT NULL DEFAULT 1,
 		fame INTEGER NOT NULL DEFAULT 0,
 		online INTEGER NOT NULL DEFAULT 0,
-		lastonline TEXT
-	);""")
+		lastonline TEXT,
+		birthdate TEXT,
+		passreset TEXT
+		);""")
 	con.commit()
 	con.close()

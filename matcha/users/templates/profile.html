@@ -80,7 +80,6 @@
 		{% if amount < 5 and (not username or session.username == username.lower()) %}
 		<form id="PhotoForm" action="" method="POST" enctype="multipart/form-data" class="col-md-4 addMoreButton">
 				<input type="file" name="picture" id="picture">
-				<!-- <button type="submit">Save Picture</button> -->
 		</form>
 		<script>
 			// Auto upload
@@ -92,6 +91,8 @@
 						var myForm = document.getElementById("PhotoForm")
 						myForm.submit();
 				});
+				setpermission()
+
 		</script>
 		{% endif %}
 	</div>

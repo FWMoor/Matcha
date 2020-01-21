@@ -1,6 +1,7 @@
 {% extends "layout.html" %} {% block content %}
 
 <p>
+	<div class="MessageRoom"></div>
 	<div class="messages">Choose room on the right</div>
 </p>
 <form class="Chatfrm" id="Chatfrm" style="display: none;">
@@ -26,7 +27,7 @@
 	<p>
 		<ul class="list-group">
 			{% for User in Matches %}
-				<li class="list-group-item list-group-item-light"><a href="#{{ User['username'] }}" onclick="SelectRoom({{ User['id']}}, '{{ User["username"] }}'); setpermission()" class="text-primary">{{ User["username"] }}</a></li>
+				<li class="list-group-item list-group-item-light"><a href="#{{ User['id'] }}" onclick="SelectRoom({{ User['id']}}, '{{ User["username"] }}')" class="text-primary">{{ User["username"] }}</a></li>
 			{% endfor %}
 		</ul>
 	</p>

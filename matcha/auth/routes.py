@@ -73,6 +73,7 @@ def register():
 				subject = "Please confirm your email"
 				send_email(email, subject, html)
 				cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', [(fname), (lname), (uid), (email), (password), (token)])
+				con.execute('INSERT INTO matches (user1, user2) VALUES (1, (SELECT id FROM users WHERE users.username = ?))', [uid])
 				con.commit()
 				con.close()
 				flash('Verification Email Sent!', 'success')

@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for, abort
 from matcha.decorators import not_logged_in, is_logged_in
-from flask_socketio import join_room, leave_room, send, emit
-from matcha.db import db_connect, dict_factory
 from .. import socketio
+from flask_socketio import join_room, leave_room, emit
+from matcha.db import db_connect, dict_factory
 from datetime import datetime
 import json
 
@@ -62,6 +62,24 @@ def getReciever(room, id):
 	con.close()
 	return result
 
+def getusernamebyid(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id = ? ", [id])
+	result = cur.fetchone()
+	con.close()
+	return result
+
+def getroombyuserids(id1, id2):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT id FROM matches WHERE user1 = ? AND user2 = ?", [id1, id2])
+	result = cur.fetchone()
+	con.close()
+	return result
+
 def insertMessage(arr):
 	con = db_connect()
 	cur = con.cursor()
@@ -69,20 +87,50 @@ def insertMessage(arr):
 	con.commit()
 	con.close()
 
+def setseen(id, room):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute(
+	"""	UPDATE messages SET seen = 1
+		WHERE matchId = ? 
+		AND receiveId = ?""",
+		[room, id])
+	con.commit()
+	con.close()
 
 @socketio.on('getHistory')
 def getHistory(data):
 	session['room'] = str(data['room'])
-	JSON = {
-			"reciever": getReciever(session['room'], session['id'])['username'],
-			"message": getMessages(data['room']),
-			"sender": session['username'],
-			"id": session['id']
-	}
-	emit('load', JSON, json=True)
+	#set messages as seen
+	setseen(session['id'], data['room'])
+	#construct messages
+	reciever = getReciever(session['room'], session['id'])['username']
+	messages = getMessages(data['room'])
+	strmessages = ''
+	for message in messages:
+		if (message['senderId'] == session['id']):
+			css = "send"
+			user = session['username']
+		else:
+			css = "recieve"
+			user = reciever
+		if (message['seen'] == 1):
+			status = 'seen'
+		else:
+			status = 'unseen'
+		strmessages += """
+		<div class="message content-section {}">
+			<h5>@{}</h5>
+			<p>{}</p>
+			<span class="time-right {} ">{}</span>
+		</div>
+		<br>""".format(css,user, message['message'], status ,message['time'])
+	emit('load', strmessages)
 
 @socketio.on('connect')
 def connect_all():
+	if (not session.get('room')):
+		session['room'] = None
 	Matches=getMatches()
 	if Matches is not None:
 		for match in Matches:
@@ -92,10 +140,7 @@ def connect_all():
 def message(data):
 	if (session.get('room')):
 		date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-		receive = getReciever(session['room'], session['id'])
-		receiveId = receive['id']
-		receiver = receive['username']
-
+		receiveId = getReciever(session['room'], session['id'])['userid']
 		msg = escape(data['message'])
 		if not msg.isspace():
 			insertMessage([session['room'], session['id'], receiveId, msg, date_time])
@@ -106,5 +151,23 @@ def message(data):
 				<span class="time-right">{}</span>
 			</div>
 			<br>""".format(session['username'], msg,date_time)
-			JSON = {"message": message, "room": receiver, "rawmsg": msg, "roomname": session['username']}
-			emit('update',JSON, room=session['room'], json=True)
+			JSON = {"message": message, "rawmsg": msg, "roomname": session['room'], "sender": session['username']}
+			emit('update',JSON,room=session['room'], json=True)
+
+def sysmsg(data):
+	date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+	username = getusernamebyid(data['id'])
+	msg = escape(data['message'])
+	room = getroombyuserids(1, data['id'])['id']
+	# print(room)
+	if not msg.isspace():
+		insertMessage([room, 1, data['id'], msg, date_time])
+		message = """
+		<div class="message content-section">
+			<h5>@{}</h5>
+			<p>{}</p>
+			<span class="time-right">{}</span>
+		</div>
+		<br>""".format(session['username'], msg,date_time)
+		JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
+		emit('update',JSON,room=str(room), json=True, namespace = '/')

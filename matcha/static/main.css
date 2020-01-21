@@ -117,3 +117,31 @@ a.article-title:hover {
 .info-heads {
 	margin-bottom: 0.1rem !important;
 }
+
+.recieve {
+	background-color: #eeeeee;
+	text-align: right;
+}
+
+.send {
+	background-color: rgb(185, 185, 185);
+	text-align: left;
+}
+
+.seen {
+	color: chartreuse;
+}
+
+.unseen {
+	color: firebrick;
+}
+
+.messages {
+	overflow-y: auto;
+	height: 35vw;
+}
+
+.MessageRoom {
+	font-size: large;
+	font-display: initial;
+}
