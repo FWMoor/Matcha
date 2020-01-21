@@ -73,8 +73,10 @@
 				src="{{url_for('static', filename='photos/' + pic.path)}}"
 				class="img-fluid img-thumbnail"
 			/>
+			{% if not username or session.username == username.lower() %}
 			<a href="{{ url_for('users.set_pic', photoId=pic.id) }}" class="btn btn-primary">Set AVI</a>
 			<a href="{{ url_for('users.delete_pic', photoId=pic.id) }}" class="btn btn-danger">Delete</a>
+			{% endif %}
 		</figure>
 		{% endfor %}
 		{% if amount < 5 and (not username or session.username == username.lower()) %}

@@ -91,7 +91,7 @@ def setseen(id, room):
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute(
-	"""	UPDATE messages SET seen = 1
+	"""UPDATE messages SET seen = 1
 		WHERE matchId = ? 
 		AND receiveId = ?""",
 		[room, id])
@@ -124,7 +124,7 @@ def getHistory(data):
 			<p>{}</p>
 			<span class="time-right {} ">{}</span>
 		</div>
-		<br>""".format(css,user, message['message'], status ,message['time'])
+		<br>""".format(css, user, message['message'], css,message['time'])
 	emit('load', strmessages)
 
 @socketio.on('connect')
