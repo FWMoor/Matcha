@@ -25,6 +25,17 @@
 	</div>
 	<br />
 	<div>
+		<legend class="border-bottom mb-4">My Tags</legend>
+		{% for my in mine %}
+		<a
+			class="btn btn-tags"
+			href="{{ url_for('users.pick_tag', tagId=my.id) }}"
+			>{{ my.tags }}</a
+		>
+		{% endfor %}
+	</div>
+	<br />
+	<div>
 		<form action="" method="POST">
 			<fieldset class="form-group">
 				<legend class="border-bottom mb-4">Add Tag</legend>

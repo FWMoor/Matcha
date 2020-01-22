@@ -98,7 +98,7 @@ def profile(username):
 		pics = cur.fetchall()
 		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
 		profile = cur.fetchone()
-		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [result['id']])
+		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=? LIMIT 5)", [result['id']])
 		tags = cur.fetchall()
 		blocked = 0
 		liked = 0
@@ -190,8 +190,10 @@ def tags():
 	popular = cur.fetchall()
 	cur.execute("SELECT * FROM tags")
 	tags = cur.fetchall()
+	cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [session['id']])
+	mine = cur.fetchall()
 	con.close()
-	return render_template('tags.html', popular=popular, tags=tags)
+	return render_template('tags.html', popular=popular, tags=tags, mine=mine)
 
 @users.route('/profile/password', methods=['GET', 'POST'])
 @is_logged_in

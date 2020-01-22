@@ -65,9 +65,11 @@
 	<div>
 		<legend class="border-bottom mb-4">Tags</legend>
 		{% if tags %}
+			<span style="word-break: break-word;">
 			{% for tag in tags %}
-			<p>{{ tag.tags }}</p>
+			#{{ tag.tags }}&nbsp;&nbsp;&nbsp;
 			{% endfor %}
+			</span>
 		{% else %}
 			<span>No tags chosen</span>
 		{% endif %}
