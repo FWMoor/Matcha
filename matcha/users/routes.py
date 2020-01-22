@@ -98,6 +98,8 @@ def profile(username):
 		pics = cur.fetchall()
 		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
 		profile = cur.fetchone()
+		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [result['id']])
+		tags = cur.fetchall()
 		blocked = 0
 		liked = 0
 		matched = 0
@@ -125,7 +127,7 @@ def profile(username):
 				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
 			else:
 				age = 0
-			return render_template('profile.html', user=result, username=username, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age)
+			return render_template('profile.html', user=result, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age, tags=tags)
 		except TemplateNotFound:
 			abort(404)
 	else:
@@ -169,6 +171,27 @@ def edit():
 				abort(404)
 		else:
 			abort(404)
+
+@users.route('/profile/tags', methods=['GET', 'POST'])
+@is_logged_in
+def tags():
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	if request.method == 'POST':
+		cur.execute("SELECT * FROM tags WHERE UPPER(tags) = UPPER(?)", [request.form.get('tag')])
+		result = cur.fetchall()
+		if result:
+			flash('Tag already exists!', 'danger')
+		else:
+			cur.execute("INSERT INTO tags (tags) VALUES (UPPER(?))", [request.form.get('tag')])
+			con.commit()
+	cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags GROUP BY tagId ORDER BY COUNT(tagId) DESC LIMIT 5)")
+	popular = cur.fetchall()
+	cur.execute("SELECT * FROM tags")
+	tags = cur.fetchall()
+	con.close()
+	return render_template('tags.html', popular=popular, tags=tags)
 
 @users.route('/profile/password', methods=['GET', 'POST'])
 @is_logged_in
@@ -321,3 +344,20 @@ def match_user(userId):
 		con.close()
 	update_fame_rating(userId)
 	return redirect(url_for('users.profile', username=user[3]))
+
+@users.route('/profile/pick_tag/<tagId>')
+@is_logged_in
+def pick_tag(tagId):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("SELECT * FROM usertags WHERE userId=? AND tagId=?", [session['id'], tagId])
+	result = cur.fetchone()
+	if result:
+		flash('Tag deleted from account!', 'success')
+		cur.execute("DELETE FROM usertags WHERE userId=? AND tagId=?", [session['id'], tagId])
+	else:
+		flash('Tag added to account!', 'success')
+		cur.execute("INSERT INTO usertags (userId, tagId) VALUES (?, ?)", [session['id'], tagId])
+	con.commit()
+	con.close()
+	return redirect(url_for('users.tags'))

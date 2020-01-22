@@ -1,0 +1,50 @@
+{% extends "layout.html" %} {% block content %}
+
+<div class="content-section">
+	<h1>Tags</h1>
+	<div>
+		<legend class="border-bottom mb-4">Popular Tags</legend>
+		{% for pop in popular %}
+		<a
+			class="btn btn-tags"
+			href="{{ url_for('users.pick_tag', tagId=pop.id) }}"
+			>{{ pop.tags }}</a
+		>
+		{% endfor %}
+	</div>
+	<br />
+	<div>
+		<legend class="border-bottom mb-4">All Tags</legend>
+		{% for tag in tags %}
+		<a
+			class="btn btn-tags"
+			href="{{ url_for('users.pick_tag', tagId=tag.id) }}"
+			>{{ tag.tags }}</a
+		>
+		{% endfor %}
+	</div>
+	<br />
+	<div>
+		<form action="" method="POST">
+			<fieldset class="form-group">
+				<legend class="border-bottom mb-4">Add Tag</legend>
+				<div class="form-group">
+					<label for="tag" class="form-control-label">New Tag</label>
+					<input
+						type="text"
+						name="tag"
+						id="tag"
+						class="form-control form-control-lg"
+					/>
+				</div>
+			</fieldset>
+			<div class="form-group d-flex justify-content-between">
+				<button type="submit" class="btn btn-outline-primary">
+					Add
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock content %}

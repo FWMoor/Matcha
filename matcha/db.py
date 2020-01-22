@@ -56,6 +56,17 @@ def setup_tables():
 		profile INTEGER
 	);""")
 	con.commit()
+	cur.execute("""CREATE TABLE IF NOT EXISTS tags (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		tags TEXT NOT NULL
+	);""")
+	con.commit()
+	cur.execute("""CREATE TABLE IF NOT EXISTS usertags (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		userId INTEGER NOT NULL,
+		tagId INTEGER NOT NULL
+	);""")
+	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		fname	TEXT NOT NULL,

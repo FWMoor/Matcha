@@ -60,6 +60,17 @@
 				{% endif %}
 			{% endif %}
 		</div>
+		<br>
+	</div>
+	<div>
+		<legend class="border-bottom mb-4">Tags</legend>
+		{% if tags %}
+			{% for tag in tags %}
+			<p>{{ tag.tags }}</p>
+			{% endfor %}
+		{% else %}
+			<span>No tags chosen</span>
+		{% endif %}
 	</div>
 </div>
 
@@ -73,13 +84,13 @@
 				src="{{url_for('static', filename='photos/' + pic.path)}}"
 				class="img-fluid img-thumbnail"
 			/>
-			{% if not username or session.username == username.lower() %}
+			{% if not user.username or session.username == user.username.lower() %}
 			<a href="{{ url_for('users.set_pic', photoId=pic.id) }}" class="btn btn-primary">Set AVI</a>
 			<a href="{{ url_for('users.delete_pic', photoId=pic.id) }}" class="btn btn-danger">Delete</a>
 			{% endif %}
 		</figure>
 		{% endfor %}
-		{% if amount < 5 and (not username or session.username == username.lower()) %}
+		{% if amount < 5 and (not user.username or session.username == user.username.lower()) %}
 		<form id="PhotoForm" action="" method="POST" enctype="multipart/form-data" class="col-md-4 addMoreButton">
 				<input type="file" name="picture" id="picture">
 		</form>
@@ -109,10 +120,11 @@
 		<h4>{{ user.fame }} / 5</h4>
 		<h4>Fame Rating</h4>
 	</div>
-	{% if not username or session.username == username.lower() %}
+	{% if not user.username or session.username == user.username.lower() %}
 	<p>
 		<ul class="list-group">
 			<li class="list-group-item list-group-item-light"><a href="#" class="text-primary">Matches</a></li>
+			<li class="list-group-item list-group-item-light"><a href="{{ url_for('users.tags') }}" class="text-primary">Edit Tags</a></li>
 			<li class="list-group-item list-group-item-light"><a href="{{ url_for('users.edit') }}" class="text-primary">Edit Profile</a></li>
 			<li class="list-group-item list-group-item-light"><a href="{{ url_for('users.password') }}" class="text-primary">Change Password</a></li>
 		</ul>

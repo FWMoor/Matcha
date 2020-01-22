@@ -145,3 +145,22 @@ a.article-title:hover {
 	font-size: large;
 	font-display: initial;
 }
+
+.btn-tags {
+	margin-top: 4px;
+	font-family: Raleway-SemiBold;
+	font-size: 13px;
+	color: rgba(44, 62, 80, 0.75);
+	letter-spacing: 1px;
+	line-height: 15px;
+	border: 2px solid rgba(44, 62, 80, 0.75);
+	border-radius: 40px;
+	background: transparent;
+	transition: all 0.3s ease 0s;
+}
+
+.btn-tags:hover {
+	color: #fff;
+	background: rgba(44, 62, 80, 0.75);
+	border: 2px solid rgba(44, 62, 80, 0.75);
+}
