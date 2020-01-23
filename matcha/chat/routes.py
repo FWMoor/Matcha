@@ -27,6 +27,15 @@ def escape(s, quote=True):
 		s = s.replace('\'', "&#x27;")
 	return s
 
+def getmessagecount(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT COUNT(id) as count FROM messages WHERE receiveId=? AND seen = 0", [id])
+	result = cur.fetchone()
+	con.close()
+	return result['count']
+
 def getMatches():
 	con = db_connect()
 	con.row_factory = dict_factory
@@ -61,6 +70,14 @@ def getReciever(room, id):
 	result = cur.fetchone()
 	con.close()
 	return result
+
+def notinmatch(room):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT count(id) FROM matches where (user1 = ? or user2 = ?) AND id = ?", [session['id'], session['id'], room])
+	result = cur.fetchone()
+	return (result == 1)
 
 def getusernamebyid(id):
 	con = db_connect()
@@ -113,6 +130,8 @@ def getHistory(data):
 	session['room'] = str(data['room'])
 	#set messages as seen
 	setseen(session['id'], data['room'])
+	if (notinmatch(session['room'])):
+		abort(403)
 	#construct messages
 	reciever = getReciever(session['room'], session['id'])['username']
 	messages = getMessages(data['room'])
@@ -184,6 +203,11 @@ def sysmsg(data):
 
 @socketio.on('location')
 def location(data):
-	print(session['username'] + " location data:")
-	print(data)
 	setCords(data['lng'], data['lat'], session['id'])
+
+@socketio.on('update_msgcnt')
+@is_logged_in
+def updatemessagecount():
+	count = getmessagecount(session['id'])
+	session['msgcnt'] = count
+	return count

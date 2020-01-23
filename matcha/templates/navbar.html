@@ -20,8 +20,13 @@
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="{{ url_for('chat.sessions') }}"
-					>Messages</a
-				>
+					>Messages
+					<sub id="msgcnt">
+					{% if session.msgcnt > 0 %}
+						{{ session.msgcnt }}
+					{% endif %}
+					</sub>
+				</a>
 			</li>
 			{% else %}
 			<li class="nav-item">

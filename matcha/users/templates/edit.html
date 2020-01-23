@@ -136,35 +136,5 @@
 		</div>
 	</form>
 </div>
-<script>
-//Location
-function setlocation()
-{
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(
-		(position) => {
-			var lat = position.coords.latitude
-			var lng =  position.coords.longitude
-			socket.emit("location",{"lng": lng, "lat":lat})
-		},
-		(error) => {
-			ajaxreq()
-		});
-	} else {
-		ajaxreq()
-	}
-}
-
-function ajaxreq()
-{
-	$.ajax({
-		dataType: "json",
-		url: "https://ipapi.co/json/",
-		success: function(data){
-			socket.emit("location", {"lng": data['longitude'], "lat":data['latitude']})
-		}
-	})
-}
-</script>
 
 {% endblock content %}
