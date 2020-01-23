@@ -33,9 +33,9 @@ def getMatches():
 	cur = con.cursor()
 	if session.get('id') is not None:
 		id = session['id']
-		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ?
+		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND NOT UPPER(users.username) = ?
 		UNION
-		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ?""", [id,id])
+		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(users.username) = ?""", [id, 'SYSTEM', id, 'SYSTEM'])
 		result = cur.fetchall()
 		con.close()
 	else:

@@ -15,6 +15,11 @@ import secrets
 auth = Blueprint('auth', __name__,
 				 template_folder='./templates', static_folder='static')
 
+def get_age(birthDate):
+	today = date.today()
+	age = today.year - birthDate.year - ((today.month, today.day) < (birthDate.month, birthDate.day))
+	return age
+
 @auth.route('/register', methods=['GET', 'POST'])
 @not_logged_in
 def register():
@@ -116,6 +121,10 @@ def login():
 				flash('Welcome back!', 'success')
 				cur.execute("UPDATE users SET lastonline=? WHERE id=?", ["now", session['id']])
 				cur.execute("UPDATE users SET passreset=? WHERE id=?", [None, result['id']])
+				if result['birthdate']:
+					data = result['birthdate'].split("-")
+					age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
+					cur.execute("UPDATE users SET age=? WHERE id=?", [age, result['id']])
 				con.commit()
 				con.close()
 				return redirect(url_for('users.profile'))

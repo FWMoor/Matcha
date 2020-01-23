@@ -98,7 +98,7 @@ def profile(username):
 		pics = cur.fetchall()
 		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
 		profile = cur.fetchone()
-		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=? LIMIT 5)", [result['id']])
+		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [result['id']])
 		tags = cur.fetchall()
 		blocked = 0
 		liked = 0
@@ -122,9 +122,8 @@ def profile(username):
 			if result['password']:
 				del result['password']
 			update_fame_rating(result['id'])
-			if result['birthdate']:
-				data = result['birthdate'].split("-")
-				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
+			if result['age']:
+				age = result['age']
 			else:
 				age = 0
 			return render_template('profile.html', user=result, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age, tags=tags)
@@ -147,7 +146,10 @@ def edit():
 			flash('Username or email already in use!', 'danger')
 			return redirect(url_for('users.edit'))
 		else:
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, sexuality=?, birthdate=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), notif, session['id']])
+			if request.form.get('birthdate'):
+				data = request.form.get('birthdate').split("-")
+				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
+			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), notif, session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
@@ -363,3 +365,19 @@ def pick_tag(tagId):
 	con.commit()
 	con.close()
 	return redirect(url_for('users.tags'))
+
+@users.route('/profile/likes/<type>')
+@is_logged_in
+def likes(type):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	likes = []
+	if type == 'likes':
+		cur.execute("SELECT * FROM users WHERE id IN (SELECT user2 FROM likes WHERE user1=?)", [session['id']])
+		likes = cur.fetchall()
+	elif type == 'matches':
+		cur.execute("SELECT * FROM users WHERE id IN (SELECT user1 FROM matches WHERE user1=? OR user2=?) AND NOT UPPER(username)=?", [session['id'], session['id'], 'SYSTEM'])
+		likes = cur.fetchall()
+	con.close()
+	return render_template('likes.html', likes=likes, type=type.upper())

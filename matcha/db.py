@@ -78,6 +78,7 @@ def setup_tables():
 		banned INTEGER NOT NULL DEFAULT 0,
 		gender TEXT,
 		bio TEXT,
+		age INTEGER,
 		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
 		location TEXT,
