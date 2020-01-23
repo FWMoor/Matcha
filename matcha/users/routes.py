@@ -27,7 +27,7 @@ def update_fame_rating(id):
 	cur.execute("SELECT * FROM likes WHERE user2=?", [id])
 	like = cur.fetchall()
 	likes = len(like)
-	cur.execute("SELECT * FROM matches WHERE user2=?", [id])
+	cur.execute("SELECT * FROM matches WHERE user2=? OR user1=?", [id, id])
 	match = cur.fetchall()
 	matches = len(match)
 	cur.execute("SELECT * FROM users WHERE NOT id=?", [id])

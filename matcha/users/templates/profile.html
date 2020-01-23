@@ -92,6 +92,8 @@
 			{% endif %}
 		</figure>
 		{% endfor %}
+	</div>
+	<div class="row text-center">
 		{% if amount < 5 and (not user.username or session.username == user.username.lower()) %}
 		<form id="PhotoForm" action="" method="POST" enctype="multipart/form-data" class="col-md-4 addMoreButton">
 				<input type="file" name="picture" id="picture">
