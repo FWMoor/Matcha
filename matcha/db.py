@@ -86,7 +86,8 @@ def setup_tables():
 		birthdate TEXT,
 		passreset TEXT,
 		lngCord REAL,
-		latCord REAL
+		latCord REAL,
+		totalviews INTEGER NOT NULL DEFAULT 0
 		);""")
 	con.commit()
 	con.close()

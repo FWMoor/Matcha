@@ -22,6 +22,7 @@ def get_age(birthDate):
 	return age
 
 def update_fame_rating(id):
+	total = getprofileviews(id)
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("SELECT * FROM likes WHERE user2=?", [id])
@@ -30,9 +31,6 @@ def update_fame_rating(id):
 	cur.execute("SELECT * FROM matches WHERE user2=? OR user1=?", [id, id])
 	match = cur.fetchall()
 	matches = len(match)
-	cur.execute("SELECT * FROM users WHERE NOT id=?", [id])
-	tot = cur.fetchall()
-	total = len(tot)
 	if (total > 0):
 		fame = (likes + matches) / total * 5
 	else:
@@ -62,6 +60,26 @@ def save_picture(form_picture):
 	else:
 		flash('Unsupported extention type!', 'danger')
 		return 'Empty'
+
+def getprofileviews(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT totalviews as count FROM users WHERE id=?", [id])
+	result = cur.fetchone()
+	con.close()
+	return result['count']
+
+def addprofileviews(id):
+	views = getprofileviews(id) + 1
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute(
+	"""UPDATE users SET totalviews = ?
+		WHERE id = ?""",
+		[views, id])
+	con.commit()
+	con.close()
 
 @users.route('/profile', defaults={'username': None}, methods=['GET', 'POST'])
 @users.route('/profile/<username>', methods=['GET', 'POST'])
@@ -118,11 +136,13 @@ def profile(username):
 				liked = 1 if like != None else 0
 		con.close()
 
+		#update profile views
 		referrer = request.referrer
 		if (username != session['username']):
 			if (request.url != referrer):
 				data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
 				sysmsg(data)
+				addprofileviews(result['id'])
 
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
