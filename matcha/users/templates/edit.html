@@ -120,36 +120,9 @@
 {{ user.bio }}</textarea
 				>
 			</div>
-			<div class="form-check">
-				{% if user.notifications %}
-				<input
-					type="checkbox"
-					name="notifications"
-					id="notifications"
-					class="form-check-input"
-					checked
-				/>
-				{% else %}
-				<input
-					type="checkbox"
-					name="notifications"
-					class="form-check-input"
-					id="notifications"
-				/>
-				{% endif %}
-				<label for="notifications" class="form-check-label"
-					>Notifications?</label
-				>
-			</div>
-			<div class="form-check">
-				<input
-					type="checkbox"
-					name="location"
-					id="location"
-					class="form-check-input"
-				/>
-				<label for="location" class="form-check-label">Location?</label>
-			</div>
+			<!-- Notifications toggle button -->
+			<a onclick="setpermission()" class="btn btn-outline-primary">Enable Notifications</a>
+			<a onclick="setlocation()" class="btn btn-outline-primary">Set Location</a>
 		</fieldset>
 		<div class="form-group d-flex justify-content-between">
 			<button type="submit" class="btn btn-outline-primary">

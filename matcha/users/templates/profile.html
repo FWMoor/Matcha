@@ -106,8 +106,8 @@
 						var myForm = document.getElementById("PhotoForm")
 						myForm.submit();
 				});
-				setpermission()
-
+				// get location on login :)
+				setlocation()
 		</script>
 		{% endif %}
 	</div>
@@ -145,6 +145,7 @@
 		<br>
 		{% endif %}
 
+	{% if user.id != 1 %}
 		{% if matched == 1%}
 		<a class="btn btn-primary" href="{{ url_for('users.match_user', userId=user.id) }}" role="button">Unmatch</a>
 		{% else %}
@@ -159,6 +160,7 @@
 		{% else %}
 		<a class="btn btn-danger" href="{{ url_for('users.block_user', userId=user.id) }}" role="button">Block</a>
 		{% endif %}
+	{% endif %}
 	{% endif %}
 </div>
 

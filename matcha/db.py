@@ -87,7 +87,9 @@ def setup_tables():
 		online INTEGER NOT NULL DEFAULT 0,
 		lastonline TEXT,
 		birthdate TEXT,
-		passreset TEXT
+		passreset TEXT,
+		lngCord REAL,
+		latCord REAL
 		);""")
 	con.commit()
 	con.close()

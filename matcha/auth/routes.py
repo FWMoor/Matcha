@@ -118,6 +118,7 @@ def login():
 				session['lname'] = result['lname']
 				session['email'] = result['email']
 				session['id'] = result['id']
+				session['msgcnt'] = 0
 				flash('Welcome back!', 'success')
 				cur.execute("UPDATE users SET lastonline=? WHERE id=?", ["now", session['id']])
 				cur.execute("UPDATE users SET passreset=? WHERE id=?", [None, result['id']])

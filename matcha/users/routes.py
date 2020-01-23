@@ -275,7 +275,7 @@ def block_user(userId):
 		flash('User has been unblocked!', 'success')
 	else:
 		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
-		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=? AND user1 <> 1", [session['id'], userId])
 		# set system msg if blocked
 		con.commit()
 		con.close()
@@ -294,8 +294,8 @@ def like_user(userId):
 	user = cur.fetchone()
 	cur.execute("SELECT * FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
 	result = cur.fetchone()
-	if result:
-		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+	if (result and userId != 1):
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=? AND user1 <> 1", [session['id'], userId])
 		flash('User has been unliked!', 'success')
 		# set system message if unliked
 		con.commit()
@@ -304,13 +304,13 @@ def like_user(userId):
 		sysmsg(data)
 	else:
 		cur.execute("INSERT INTO likes (user1, user2) VALUES (?, ?)", [session['id'], userId])
-		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
+		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=? AND userId <> 1", [session['id'], userId])
 		con.commit()
-		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 		matched = cur.fetchall()
 		if len(matched) == 2:
 			cur.execute("INSERT INTO matches (user1, user2) VALUES (?, ?)", [session['id'], userId])
-			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 			# set system message if matched
 			con.commit()
 			con.close()
@@ -337,7 +337,7 @@ def match_user(userId):
 	cur.execute("SELECT * FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
 	result = cur.fetchone()
 	if result:
-		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 		con.commit()
 		con.close()
 		data = {'id': userId, "message":session['username'] + " unmatched you"}
