@@ -42,9 +42,9 @@ def getMatches():
 	cur = con.cursor()
 	if session.get('id') is not None:
 		id = session['id']
-		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND NOT UPPER(users.username) = ?
+		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ?
 		UNION
-		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(users.username) = ?""", [id, 'SYSTEM', id, 'SYSTEM'])
+		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ?""", [id, id])
 		result = cur.fetchall()
 		con.close()
 	else:
@@ -112,16 +112,6 @@ def setseen(id, room):
 		WHERE matchId = ? 
 		AND receiveId = ?""",
 		[room, id])
-	con.commit()
-	con.close()
-
-def setCords(lng, lat, id):
-	con = db_connect()
-	cur = con.cursor()
-	cur.execute(
-	"""	UPDATE users SET lngCord = ?, latCord = ?
-		WHERE id = ?""",
-		[lng, lat, id])
 	con.commit()
 	con.close()
 
@@ -200,10 +190,6 @@ def sysmsg(data):
 		<br>""".format(session['username'], msg,date_time)
 		JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
 		emit('update',JSON,room=str(room), json=True, namespace = '/')
-
-@socketio.on('location')
-def location(data):
-	setCords(data['lng'], data['lat'], session['id'])
 
 @socketio.on('update_msgcnt')
 @is_logged_in

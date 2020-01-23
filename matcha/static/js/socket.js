@@ -4,19 +4,28 @@ location.hash = '';
 // Update every 5 sec
 window.setInterval(() =>
 {
+	var url_raw = window.location.href
+
+	if (url_raw.indexOf("login") > -1)
+		return
+	if (url_raw.indexOf("register") > -1)
+		return
 	socket.emit('update_msgcnt',
 		cb = (data) => {
 			if (data > 0)
 				$('#msgcnt').text(data);
 				$('div.messages').empty();
-				var room = window.location.href.split('#').pop()
-				if (room)
+				if (url_raw.indexOf('#') > -1)
 				{
-					socket.emit('getHistory', {
-						'room': room,
-						'username': $('div.MessageRoom').text()
-					});
-					$('#Chatfrm').css('display', 'inline-block')
+					var room = url_raw.split('#').pop()
+					if (room)
+					{
+						socket.emit('getHistory', {
+							'room': room,
+							'username': $('div.MessageRoom').text()
+						});
+						$('#Chatfrm').css('display', 'inline-block')
+					}
 				}
 		}
 	)
@@ -58,12 +67,12 @@ function setpermission()
 		alert("This browser does not support desktop notification");
 	}
 	else if (Notification.permission === "granted") {
-		  var notification = new Notification("Welcome to Matcha!");
+		  var notification = new Notification("Notifications are enabled!");
 	}
 	else if (Notification.permission !== "denied") {
 		Notification.requestPermission().then((permission) =>{
 			if (permission === "granted") {
-				var notification = new Notification("Welcome to Matcha!")
+				var notification = new Notification("Notifications are enabled!")
 			};
 		});
 	}
@@ -88,15 +97,15 @@ function createnotification(message,title)
 
 
 //Location
-function setlocation()
+function getlocation()
 {
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(
 		(position) => {
 			var lat = position.coords.latitude
 			var lng =  position.coords.longitude
-			socket.emit("location",{"lng": lng, "lat":lat})
-			createnotification("Location updated!", "System info")
+			$('#latCord').val(lat)
+			$('#lngCord').val(lng)
 		},
 		(error) => {
 			ajaxreq()
@@ -112,8 +121,8 @@ function ajaxreq()
 		dataType: "json",
 		url: "https://ipapi.co/json/",
 		success: function(data){
-			socket.emit("location", {"lng": data['longitude'], "lat":data['latitude']})
-			createnotification("Location updated!", "System info")
+			$('#latCord').val(data['longitude'])
+			$('#lngCord').val(data['latitude'])
 		}
 	})
 }

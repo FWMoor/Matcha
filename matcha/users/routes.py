@@ -116,6 +116,11 @@ def profile(username):
 				like = cur.fetchone()
 				liked = 1 if like != None else 0
 		con.close()
+
+		if (username != session['username']):
+			data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
+			sysmsg(data)
+
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
 		try:
@@ -139,7 +144,6 @@ def edit():
 	con.row_factory = dict_factory
 	cur = con.cursor()
 	if request.method == 'POST':
-		notif = 1 if request.form.get('notifications') else 0
 		cur.execute("SELECT * FROM users WHERE (username=? OR email=?) AND NOT id=?", [request.form.get('username'), request.form.get('email'), session['id']])
 		results = cur.fetchall()
 		if results:
@@ -149,13 +153,20 @@ def edit():
 			if request.form.get('birthdate'):
 				data = request.form.get('birthdate').split("-")
 				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), notif, session['id']])
+				#let user update location removed notif cuz it be useless
+			if (request.form.get('latCord') and request.form.get('lngCord')):
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'), session['id']])
+				session['latCord'] = request.form.get('latCord')
+				session['lngCord'] = request.form.get('lngCord')
+			else:
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
 			session['fname'] = request.form.get('fname')
 			session['lname'] = request.form.get('lname')
 			session['email'] = request.form.get('email')
+			
 			try:
 				flash('Profile was updated!', 'success')
 				return redirect(url_for('users.profile', username=request.form.get('username')))

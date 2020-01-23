@@ -120,9 +120,43 @@
 {{ user.bio }}</textarea
 				>
 			</div>
+
+			<div class="form-group">
+				<label for="btnloc" class="form-control-label">Location:</label>
+				<div class="form-group">
+					<a name="btnloc" id="btnloc" onclick="getlocation()" class="btn btn-outline-primary">Detect Location</a><br/>
+				</div>
+				<div class="form-group">
+					<label for="latCord" class="form-control-label">latitude</label>
+					<input	type = "number" 
+							step=0.0001 
+							name="latCord" 
+							id="latCord" 
+							placeholder="latitude" 
+							class="form-control rounded-0"
+							{% if user.latCord %}
+								value ={{ user.latCord}}
+							{% endif %}
+				/></div>
+
+				<div class="form-group">
+					<label for="lngCord" class="form-control-label">longitude</label>
+					<input	type = "number"
+							step=0.0001
+							name="lngCord"
+							id="lngCord"
+							placeholder="longitude"
+							class="form-control rounded-0"
+					{% if user.lngCord %}
+						value ={{ user.lngCord}}
+					{% endif %}
+				/></div>
+
+
+			</div>
 			<!-- Notifications toggle button -->
 			<a onclick="setpermission()" class="btn btn-outline-primary">Enable Notifications</a>
-			<a onclick="setlocation()" class="btn btn-outline-primary">Set Location</a>
+
 		</fieldset>
 		<div class="form-group d-flex justify-content-between">
 			<button type="submit" class="btn btn-outline-primary">

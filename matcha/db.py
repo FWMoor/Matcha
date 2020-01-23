@@ -42,13 +42,6 @@ def setup_tables():
 		seen INTEGER DEFAULT 0
 	);""")
 	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS notifications (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		userId INTEGER NOT NULL,
-		notificationFrom INTEGER NOT NULL,
-		notification TEXT NOT NULL
-	);""")
-	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS photos (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		userId INTEGER NOT NULL,
@@ -81,8 +74,6 @@ def setup_tables():
 		age INTEGER,
 		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
-		location TEXT,
-		notifications INTERGER NOT NULL DEFAULT 1,
 		fame INTEGER NOT NULL DEFAULT 0,
 		online INTEGER NOT NULL DEFAULT 0,
 		lastonline TEXT,
