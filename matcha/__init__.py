@@ -7,7 +7,7 @@ import re
 socketio = SocketIO()
 mail = Mail()
 
-from matcha.decorators import not_logged_in, is_logged_in
+from matcha.decorators import not_logged_in, is_logged_in, is_admin, is_admin_or_logged_in
 from matcha.auth.routes import auth
 from matcha.main.routes import main
 from matcha.users.routes import users

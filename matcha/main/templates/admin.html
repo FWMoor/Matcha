@@ -1,34 +1,38 @@
 {% extends 'layout.html' %} {% block content %}
 
-<table>
-	<tr>
-		<th>Reported</th>
-		<th>Ban</th>
-		<th>Remove</th>
-	</tr>
-	{% for user in users %}
-	<tr>
-		<td>
-			<a href="{{ url_for('users.profile', username=user.username) }}"
-				>{{ user.username }}</a
-			>
-		</td>
-		<td>
-			<a
-				href="{{ url_for('main.ban_user', reportedId=user.id) }}"
-				class="text-danger"
-				>Ban</a
-			>
-		</td>
-		<td>
-			<a
-				href="{{ url_for('main.remove_report', reportedId=user.id) }}"
-				class="text-danger"
-				>Remove</a
-			>
-		</td>
-	</tr>
-	{% endfor %}
+<table class="table table-striped table-hover">
+	<thead class="thead-dark">
+		<tr >
+			<th scope="col">Reported</th scope="col">
+			<th scope="col">Ban</th>
+			<th scope="col">Remove</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for user in users %}
+		<tr >
+			<td>
+				<a href="{{ url_for('users.profile', username=user.username) }}"
+					>{{ user.username }}</a
+				>
+			</td>
+			<td>
+				<a
+					href="{{ url_for('main.ban_user', reportedId=user.id) }}"
+					class="text-danger"
+					>Ban</a
+				>
+			</td>
+			<td>
+				<a
+					href="{{ url_for('main.remove_report', reportedId=user.id) }}"
+					class="text-danger"
+					>Remove</a
+				>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
 </table>
 
 {% endblock %}

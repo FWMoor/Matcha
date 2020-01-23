@@ -4,7 +4,7 @@ from jinja2 import TemplateNotFound
 from datetime import datetime, date
 
 from matcha.auth.utils import hash_password, verify_password
-from matcha.decorators import not_logged_in, is_logged_in
+from matcha.decorators import not_logged_in, is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
 
 from matcha.auth.email import send_email
@@ -141,7 +141,7 @@ def login():
 
 
 @auth.route('/logout')
-@is_logged_in
+@is_admin_or_logged_in
 def logout():
 	con = db_connect()
 	cur = con.cursor()
