@@ -5,7 +5,7 @@ from matcha.db import db_connect, dict_factory
 from matcha.decorators import not_logged_in, is_logged_in, is_admin
 
 main = Blueprint('main', __name__,
-				 template_folder='./templates', static_folder='static')
+				template_folder='./templates', static_folder='static')
 
 @main.route('/')
 @not_logged_in
@@ -21,22 +21,20 @@ def admin():
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
-	cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM reports)")
-	reportees = cur.fetchall()
 	cur.execute("SELECT * FROM users WHERE id IN (SELECT reportedId FROM reports)")
 	reporteds = cur.fetchall()
 	con.close()
 	try:
-		return render_template('admin.html', users=zip(reportees, reporteds))
+		return render_template('admin.html', users=reporteds)
 	except TemplateNotFound:
 		abort(404)
 
-@main.route('/ban/<userId>/<reportedId>')
+@main.route('/ban/<reportedId>')
 @is_admin
 def ban_user(userId, reportedId):
 	con = db_connect()
 	cur = con.cursor()
-	cur.execute("DELETE FROM reports WHERE userid=? AND reportedId=?", [userId, reportedId])
+	cur.execute("DELETE FROM reports WHERE reportedId=?", [reportedId])
 	cur.execute("DELETE FROM users WHERE id=?", [reportedId])
 	con.commit()
 	con.close()
@@ -46,12 +44,12 @@ def ban_user(userId, reportedId):
 	except TemplateNotFound:
 		abort(404)
 
-@main.route('/remove/<userId>/<reportedId>')
+@main.route('/remove/<reportedId>')
 @is_admin
 def remove_report(userId, reportedId):
 	con = db_connect()
 	cur = con.cursor()
-	cur.execute("DELETE FROM reports WHERE userid=? AND reportedId=?", [userId, reportedId])
+	cur.execute("DELETE FROM reports WHERE reportedId=?", [reportedId])
 	con.commit()
 	con.close()
 	try:
@@ -62,6 +60,7 @@ def remove_report(userId, reportedId):
 
 @main.route('/feed', methods=['GET', 'POST'])
 @is_logged_in
+@is_admin
 def feed():
 	con = db_connect()
 	con.row_factory = dict_factory

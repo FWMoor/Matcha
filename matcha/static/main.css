@@ -21,6 +21,21 @@ nav {
 	margin-bottom: 2em;
 }
 
+th {
+	font-size: 18px;
+	text-align: left;
+	background-color: white;
+	padding: 10px 8px;
+	color: #464646;
+}
+
+td {
+	font-size: 14px;
+	text-align: left;
+	background-color: white;
+	padding: 8px;
+}
+
 .bg-steel {
 	background-color: #4f33ff;
 }

@@ -2,33 +2,27 @@
 
 <table>
 	<tr>
-		<th>Reportee Id</th>
-		<th>Reported Id</th>
-		<th>Ban Reported</th>
-		<th>Remove Report</th>
+		<th>Reported</th>
+		<th>Ban</th>
+		<th>Remove</th>
 	</tr>
 	{% for user in users %}
 	<tr>
 		<td>
-			<a href="{{ url_for('users.profile', username=user[0].username) }}"
-				>{{ user[0].username }}</a
-			>
-		</td>
-		<td>
-			<a href="{{ url_for('users.profile', username=user[1].username) }}"
-				>{{ user[1].username }}</a
+			<a href="{{ url_for('users.profile', username=user.username) }}"
+				>{{ user.username }}</a
 			>
 		</td>
 		<td>
 			<a
-				href="{{ url_for('main.ban_user', userId=user[0].id, reportedId=user[1].id) }}"
+				href="{{ url_for('main.ban_user', reportedId=user.id) }}"
 				class="text-danger"
 				>Ban</a
 			>
 		</td>
 		<td>
 			<a
-				href="{{ url_for('main.remove_report', userId=user[0].id, reportedId=user[1].id) }}"
+				href="{{ url_for('main.remove_report', reportedId=user.id) }}"
 				class="text-danger"
 				>Remove</a
 			>
