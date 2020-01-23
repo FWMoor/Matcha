@@ -90,6 +90,7 @@ def profile(username):
 					cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
 					pics = cur.fetchall()
 					if not pics:
+						cur.execute("UPDATE users SET path=? WHERE id=?", [picture_file, session['id']])
 						cur.execute("INSERT INTO photos (userId, path, profile) VALUES (?, ?, 1)", [session['id'], picture_file])
 					else:
 						cur.execute("INSERT INTO photos (userId, path) VALUES (?, ?)", [session['id'], picture_file])
@@ -241,11 +242,14 @@ def password():
 @is_logged_in
 def delete_pic(photoId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
-		os.remove('matcha/static/photos/' + result[2])
+		os.remove('matcha/static/photos/' + result['path'])
+		if result['profile'] == 1:
+			cur.execute("UPDATE users SET path=? WHERE id=?", [None, session['id']])
 		cur.execute("DELETE FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 		con.commit()
 	else:
@@ -257,13 +261,14 @@ def delete_pic(photoId):
 @is_logged_in
 def set_pic(photoId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
+		cur.execute("UPDATE users SET path=? WHERE id=?", [result['path'], session['id']])
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND profile=?", [0, session['id'], 1])
-		con.commit()
-		cur.execute("UPDATE photos SET profile=? WHERE id=? AND userId=?", [1, photoId, session['id']])
+		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND id=?", [1, session['id'], photoId])
 		con.commit()
 	else:
 		flash('Couldn\'t update profile picture!', 'danger')
@@ -274,6 +279,7 @@ def set_pic(photoId):
 @is_logged_in
 def block_user(userId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [userId])
 	user = cur.fetchone()
@@ -295,13 +301,32 @@ def block_user(userId):
 		data = {'id': userId, "message":session['username'] + " blocked you"}
 		sysmsg(data)
 		flash('User has been blocked!', 'success')
-	return redirect(url_for('users.profile', username=user[3]))
+	return redirect(url_for('users.profile', username=user['username']))
 
+@users.route('/profile/report/<userId>')
+@is_logged_in
+def report_user(userId):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id=?", [userId])
+	user = cur.fetchone()
+	cur.execute("SELECT * FROM reports WHERE userId=? AND reportedId=?", [session['id'], userId])
+	result = cur.fetchone()
+	if result:
+		flash('User has been reported!', 'success')
+	else:
+		cur.execute("INSERT INTO reports (userId, reportedId) VALUES (?, ?)", [session['id'], userId])
+		con.commit()
+		con.close()
+		flash('User has been reported!', 'success')
+	return redirect(url_for('users.profile', username=user['username']))
 
 @users.route('/profile/like/<userId>')
 @is_logged_in
 def like_user(userId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [userId])
 	user = cur.fetchone()
@@ -338,12 +363,13 @@ def like_user(userId):
 			sysmsg(data)
 			flash('User has been liked!', 'success')
 	update_fame_rating(userId)
-	return redirect(url_for('users.profile', username=user[3]))
+	return redirect(url_for('users.profile', username=user['username']))
 
 @users.route('/profile/match/<userId>')
 @is_logged_in
 def match_user(userId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [userId])
 	user = cur.fetchone()
@@ -360,7 +386,7 @@ def match_user(userId):
 		flash('Match not found!', 'success')
 		con.close()
 	update_fame_rating(userId)
-	return redirect(url_for('users.profile', username=user[3]))
+	return redirect(url_for('users.profile', username=user['username']))
 
 @users.route('/profile/pick_tag/<tagId>')
 @is_logged_in

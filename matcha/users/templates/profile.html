@@ -160,6 +160,7 @@
 		{% else %}
 		<a class="btn btn-danger" href="{{ url_for('users.block_user', userId=user.id) }}" role="button">Block</a>
 		{% endif %}
+		<a class="btn btn-danger" href="{{ url_for('users.report_user', userId=user.id) }}" role="button">Report</a>
 	{% endif %}
 	</form>
 	{% endif %}

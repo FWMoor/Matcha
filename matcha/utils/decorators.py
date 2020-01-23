@@ -15,7 +15,7 @@ def is_admin(f):
 	@wraps(f)
 	def wrap(*args, **kwargs):
 		if 'is_admin' in session:
-			return f(*args, **kwargs)
+			return redirect(url_for('main.admin'))
 		else:
 			flash('Unauthorized, Please login', 'danger')
 			return redirect(url_for('login'))
