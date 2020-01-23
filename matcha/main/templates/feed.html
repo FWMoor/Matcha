@@ -22,4 +22,50 @@
 	</div>
 	{% endfor %}
 </div>
+{% endblock %} {% block sidebar %}
+<div class="content-section">
+	<form action="" method="POST">
+		<fieldset class="form-group">
+			<legend class="border-bottom mb-4">Search</legend>
+			<div class="form-group">
+				<label for="search" class="form-control-label">Search</label>
+				<input
+					type="text"
+					name="search"
+					id="search"
+					class="form-control form-control-md"
+				/>
+			</div>
+			<div class="form-row align-items-center">
+				<div class="age-div">
+					<label class="age-label">Min</label>
+					<input type="number" name="min-age" id="min-age" min="10" />
+				</div>
+				<div class="age-div">
+					<label class="age-label">Max</label>
+					<input
+						type="number"
+						name="max-age"
+						id="max-age"
+						max="100"
+					/>
+				</div>
+			</div>
+			<div class="form-check">
+				<input
+					type="checkbox"
+					name="tags"
+					id="tags"
+					class="form-check-input"
+				/>
+				<label for="tags" class="form-check-label">Same tags</label>
+			</div>
+		</fieldset>
+		<div class="form-group d-flex justify-content-between">
+			<button type="submit" class="btn btn-outline-primary">
+				Search
+			</button>
+		</div>
+	</form>
+</div>
 {% endblock %}

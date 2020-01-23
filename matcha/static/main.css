@@ -169,3 +169,11 @@ a.article-title:hover {
 	margin-bottom: 20px;
 	padding: 0px;
 }
+
+.age-div {
+	display: inline-block;
+}
+
+.age-label {
+	display: block;
+}
