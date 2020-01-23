@@ -117,9 +117,11 @@ def profile(username):
 				liked = 1 if like != None else 0
 		con.close()
 
+		referrer = request.referrer
 		if (username != session['username']):
-			data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
-			sysmsg(data)
+			if (request.url != referrer):
+				data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
+				sysmsg(data)
 
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
