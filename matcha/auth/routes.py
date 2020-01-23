@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, request, flash, redirect, session, abort
 import re
 from jinja2 import TemplateNotFound
-from datetime import datetime
+from datetime import datetime, date
 
 from matcha.auth.utils import hash_password, verify_password
 from matcha.decorators import not_logged_in, is_logged_in

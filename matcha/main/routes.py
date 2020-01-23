@@ -34,7 +34,7 @@ def feed():
 		else:
 			cur.execute("SELECT * FROM users WHERE NOT id=? AND (gender=? OR gender=?)", [session['id'], 'M', 'F'])
 	else:
-		cur.execute("SELECT * FROM users WHERE NOT id=?", [session['id']])
+		cur.execute("SELECT * FROM users WHERE NOT id=? AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
 	users = cur.fetchall()
 	cur.close()
 	try:

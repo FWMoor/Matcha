@@ -164,3 +164,8 @@ a.article-title:hover {
 	background: rgba(44, 62, 80, 0.75);
 	border: 2px solid rgba(44, 62, 80, 0.75);
 }
+
+.feed {
+	margin-bottom: 20px;
+	padding: 0px;
+}
