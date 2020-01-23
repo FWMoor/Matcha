@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, abort, session, request
+from flask import Blueprint, render_template, abort, session, request, flash, redirect, url_for
 from jinja2 import TemplateNotFound
 from matcha.db import db_connect, dict_factory
 
-from matcha.decorators import not_logged_in, is_logged_in
+from matcha.decorators import not_logged_in, is_logged_in, is_admin
 
 main = Blueprint('main', __name__,
 				 template_folder='./templates', static_folder='static')
@@ -12,6 +12,51 @@ main = Blueprint('main', __name__,
 def home():
 	try:
 		return render_template('home.html')
+	except TemplateNotFound:
+		abort(404)
+
+@main.route('/admin')
+@is_admin
+def admin():
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM reports)")
+	reportees = cur.fetchall()
+	cur.execute("SELECT * FROM users WHERE id IN (SELECT reportedId FROM reports)")
+	reporteds = cur.fetchall()
+	con.close()
+	try:
+		return render_template('admin.html', users=zip(reportees, reporteds))
+	except TemplateNotFound:
+		abort(404)
+
+@main.route('/ban/<userId>/<reportedId>')
+@is_admin
+def ban_user(userId, reportedId):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("DELETE FROM reports WHERE userid=? AND reportedId=?", [userId, reportedId])
+	cur.execute("DELETE FROM users WHERE id=?", [reportedId])
+	con.commit()
+	con.close()
+	try:
+		flash('User has been banned!', 'success')
+		return redirect(url_for('main.admin'))
+	except TemplateNotFound:
+		abort(404)
+
+@main.route('/remove/<userId>/<reportedId>')
+@is_admin
+def remove_report(userId, reportedId):
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute("DELETE FROM reports WHERE userid=? AND reportedId=?", [userId, reportedId])
+	con.commit()
+	con.close()
+	try:
+		flash('Report has been removed!', 'success')
+		return redirect(url_for('main.admin'))
 	except TemplateNotFound:
 		abort(404)
 
@@ -61,7 +106,7 @@ def feed():
 		else:
 			cur.execute("SELECT * FROM users WHERE NOT id=? AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
 	users = cur.fetchall()
-	cur.close()
+	con.close()
 	try:
 		return render_template('feed.html', users=users)
 	except TemplateNotFound:

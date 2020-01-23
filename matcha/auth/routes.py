@@ -113,6 +113,8 @@ def login():
 				error = 1
 			if error == 0:
 				session['logged_in'] = True
+				if result['username'] == 'system':
+					session['is_admin'] = True
 				session['username'] = result['username']
 				session['fname'] = result['fname']
 				session['lname'] = result['lname']

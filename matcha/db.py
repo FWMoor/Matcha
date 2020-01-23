@@ -21,6 +21,11 @@ def setup_tables():
 		blockedId	INTEGER NOT NULL
 	);""")
 	con.commit()
+	cur.execute("""CREATE TABLE IF NOT EXISTS reports (
+		userId INTEGER NOT NULL,
+		reportedId	INTEGER NOT NULL
+	);""")
+	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS matches (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user1	INTEGER NOT NULL,
@@ -53,7 +58,6 @@ def setup_tables():
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		userId INTEGER NOT NULL,
 		path TEXT NOT NULL,
-		profile INTEGER
 	);""")
 	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS tags (
@@ -79,6 +83,7 @@ def setup_tables():
 		gender TEXT,
 		bio TEXT,
 		age INTEGER,
+		path TEXT,
 		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
 		location TEXT,

@@ -1,0 +1,40 @@
+{% extends 'layout.html' %} {% block content %}
+
+<table>
+	<tr>
+		<th>Reportee Id</th>
+		<th>Reported Id</th>
+		<th>Ban Reported</th>
+		<th>Remove Report</th>
+	</tr>
+	{% for user in users %}
+	<tr>
+		<td>
+			<a href="{{ url_for('users.profile', username=user[0].username) }}"
+				>{{ user[0].username }}</a
+			>
+		</td>
+		<td>
+			<a href="{{ url_for('users.profile', username=user[1].username) }}"
+				>{{ user[1].username }}</a
+			>
+		</td>
+		<td>
+			<a
+				href="{{ url_for('main.ban_user', userId=user[0].id, reportedId=user[1].id) }}"
+				class="text-danger"
+				>Ban</a
+			>
+		</td>
+		<td>
+			<a
+				href="{{ url_for('main.remove_report', userId=user[0].id, reportedId=user[1].id) }}"
+				class="text-danger"
+				>Remove</a
+			>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+
+{% endblock %}

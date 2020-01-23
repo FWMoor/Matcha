@@ -261,6 +261,7 @@ def set_pic(photoId):
 @is_logged_in
 def block_user(userId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [userId])
 	user = cur.fetchone()
@@ -282,13 +283,32 @@ def block_user(userId):
 		data = {'id': userId, "message":session['username'] + " blocked you"}
 		sysmsg(data)
 		flash('User has been blocked!', 'success')
-	return redirect(url_for('users.profile', username=user[3]))
+	return redirect(url_for('users.profile', username=user['username']))
 
+@users.route('/profile/report/<userId>')
+@is_logged_in
+def report_user(userId):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT * FROM users WHERE id=?", [userId])
+	user = cur.fetchone()
+	cur.execute("SELECT * FROM reports WHERE userId=? AND reportedId=?", [session['id'], userId])
+	result = cur.fetchone()
+	if result:
+		flash('User has been reported!', 'success')
+	else:
+		cur.execute("INSERT INTO reports (userId, reportedId) VALUES (?, ?)", [session['id'], userId])
+		con.commit()
+		con.close()
+		flash('User has been reported!', 'success')
+	return redirect(url_for('users.profile', username=user['username']))
 
 @users.route('/profile/like/<userId>')
 @is_logged_in
 def like_user(userId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [userId])
 	user = cur.fetchone()
@@ -325,12 +345,13 @@ def like_user(userId):
 			sysmsg(data)
 			flash('User has been liked!', 'success')
 	update_fame_rating(userId)
-	return redirect(url_for('users.profile', username=user[3]))
+	return redirect(url_for('users.profile', username=user['username']))
 
 @users.route('/profile/match/<userId>')
 @is_logged_in
 def match_user(userId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [userId])
 	user = cur.fetchone()
@@ -347,7 +368,7 @@ def match_user(userId):
 		flash('Match not found!', 'success')
 		con.close()
 	update_fame_rating(userId)
-	return redirect(url_for('users.profile', username=user[3]))
+	return redirect(url_for('users.profile', username=user['username']))
 
 @users.route('/profile/pick_tag/<tagId>')
 @is_logged_in
