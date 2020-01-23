@@ -57,7 +57,8 @@ def setup_tables():
 	cur.execute("""CREATE TABLE IF NOT EXISTS photos (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		userId INTEGER NOT NULL,
-		path TEXT NOT NULL
+		path TEXT NOT NULL,
+		profile INTEGER
 	);""")
 	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS tags (

@@ -90,6 +90,7 @@ def profile(username):
 					cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
 					pics = cur.fetchall()
 					if not pics:
+						cur.execute("UPDATE users SET path=? WHERE id=?", [picture_file, session['id']])
 						cur.execute("INSERT INTO photos (userId, path, profile) VALUES (?, ?, 1)", [session['id'], picture_file])
 					else:
 						cur.execute("INSERT INTO photos (userId, path) VALUES (?, ?)", [session['id'], picture_file])
@@ -228,11 +229,14 @@ def password():
 @is_logged_in
 def delete_pic(photoId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
-		os.remove('matcha/static/photos/' + result[2])
+		os.remove('matcha/static/photos/' + result['path'])
+		if result['profile'] == 1:
+			cur.execute("UPDATE users SET path=? WHERE id=?", [None, session['id']])
 		cur.execute("DELETE FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 		con.commit()
 	else:
@@ -244,13 +248,14 @@ def delete_pic(photoId):
 @is_logged_in
 def set_pic(photoId):
 	con = db_connect()
+	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
+		cur.execute("UPDATE users SET path=? WHERE id=?", [result['path'], session['id']])
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND profile=?", [0, session['id'], 1])
-		con.commit()
-		cur.execute("UPDATE photos SET profile=? WHERE id=? AND userId=?", [1, photoId, session['id']])
+		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND id=?", [1, session['id'], photoId])
 		con.commit()
 	else:
 		flash('Couldn\'t update profile picture!', 'danger')

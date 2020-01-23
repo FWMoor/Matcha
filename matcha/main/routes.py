@@ -60,7 +60,6 @@ def remove_report(userId, reportedId):
 
 @main.route('/feed', methods=['GET', 'POST'])
 @is_logged_in
-@is_admin
 def feed():
 	con = db_connect()
 	con.row_factory = dict_factory
