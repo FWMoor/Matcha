@@ -9,7 +9,7 @@ import os
 from matcha.chat.routes import sysmsg
 
 from matcha.auth.utils import hash_password
-from matcha.decorators import is_logged_in
+from matcha.decorators import is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
 
 ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
@@ -65,7 +65,7 @@ def save_picture(form_picture):
 
 @users.route('/profile', defaults={'username': None}, methods=['GET', 'POST'])
 @users.route('/profile/<username>', methods=['GET', 'POST'])
-@is_logged_in
+@is_admin_or_logged_in
 def profile(username):
 	if username == None:
 		username = session['username']
