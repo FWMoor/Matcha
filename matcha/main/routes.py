@@ -46,7 +46,7 @@ def ban_user(userId, reportedId):
 
 @main.route('/remove/<reportedId>')
 @is_admin
-def remove_report(userId, reportedId):
+def remove_report(reportedId):
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("DELETE FROM reports WHERE reportedId=?", [reportedId])
