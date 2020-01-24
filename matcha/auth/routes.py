@@ -128,6 +128,11 @@ def login():
 					age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
 					cur.execute("UPDATE users SET age=? WHERE id=?", [age, result['id']])
 				con.commit()
+				if result['fname'] and result['lname'] and result['username'] and result['email'] and result['gender'] and result['age'] and result['sexuality'] and result['bio'] and result['path']:
+					cur.execute("UPDATE users SET complete=? WHERE id=?", [1, session['id']])
+				else:
+					cur.execute("UPDATE users SET complete=? WHERE id=?", [0, session['id']])
+				con.commit()
 				con.close()
 				return redirect(url_for('users.profile'))
 		else:

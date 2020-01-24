@@ -101,6 +101,13 @@ def profile(username):
 		profile = cur.fetchone()
 		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [result['id']])
 		tags = cur.fetchall()
+		cur.execute("SELECT * FROM users WHERE id=?", [session['id']])
+		complete = cur.fetchone()
+		if complete['fname'] and complete['lname'] and complete['username'] and complete['email'] and complete['gender'] and complete['age'] and complete['sexuality'] and complete['bio'] and complete['path']:
+			cur.execute("UPDATE users SET complete=? WHERE id=?", [1, complete['id']])
+		else:
+			cur.execute("UPDATE users SET complete=? WHERE id=?", [0, complete['id']])
+		con.commit()
 		blocked = 0
 		liked = 0
 		matched = 0

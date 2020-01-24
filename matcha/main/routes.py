@@ -78,19 +78,19 @@ def feed():
 				else:
 					wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
 				if request.form.get('tags') == 'on':
-					cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND gender=? AND sexuality=?", [session['id'], session['id'], wanted_sexuality, user['sexuality']])
+					cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND gender=? AND sexuality=? AND complete=1", [session['id'], session['id'], wanted_sexuality, user['sexuality']])
 				else:
 					cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND gender=? AND sexuality=?", [wanted_sexuality, user['sexuality']])
 			else:
 				if request.form.get('tags') == 'on':
-					cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND (gender=? OR gender=?)", [session['id'], session['id'], 'M', 'F'])
+					cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND (gender=? OR gender=?) AND complete=1", [session['id'], session['id'], 'M', 'F'])
 				else:
 					cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND (gender=? OR gender=?)", ['F', 'M'])
 		else:
 			if request.form.get('tags') == 'on':
-				cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM'", [session['id'], session['id']])
+				cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND complete=1", [session['id'], session['id']])
 			else:
-				cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM'")
+				cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND complete=1")
 	else:
 		if user['gender'] and (user['gender'] == 'M' or user['gender'] == 'F'):
 			if user['sexuality'] == 'S' or user['sexuality'] == 'G':
@@ -98,11 +98,11 @@ def feed():
 					wanted_sexuality = 'M' if user['gender'] == 'F' else 'F'
 				else:
 					wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
-				cur.execute("SELECT * FROM users WHERE NOT id=? AND gender=? AND sexuality=? AND NOT UPPER(username)=?", [session['id'], wanted_sexuality, user['sexuality'], 'SYSTEM'])
+				cur.execute("SELECT * FROM users WHERE NOT id=? AND gender=? AND sexuality=? AND NOT UPPER(username)=? AND complete=1", [session['id'], wanted_sexuality, user['sexuality'], 'SYSTEM'])
 			else:
-				cur.execute("SELECT * FROM users WHERE NOT id=? AND (gender=? OR gender=?) AND NOT UPPER(username)=?", [session['id'], 'M', 'F', 'SYSTEM'])
+				cur.execute("SELECT * FROM users WHERE NOT id=? AND (gender=? OR gender=?) AND NOT UPPER(username)=? AND complete=1", [session['id'], 'M', 'F', 'SYSTEM'])
 		else:
-			cur.execute("SELECT * FROM users WHERE NOT id=? AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
+			cur.execute("SELECT * FROM users WHERE NOT id=? AND NOT UPPER(username)=? AND complete=1", [session['id'], 'SYSTEM'])
 	users = cur.fetchall()
 	con.close()
 	try:

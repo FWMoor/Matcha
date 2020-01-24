@@ -88,6 +88,7 @@ def setup_tables():
 		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
 		location TEXT,
+		complete INTEGER DEFAULT 0,
 		notifications INTERGER NOT NULL DEFAULT 1,
 		fame INTEGER NOT NULL DEFAULT 0,
 		online INTEGER NOT NULL DEFAULT 0,

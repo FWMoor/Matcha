@@ -14,7 +14,7 @@
 
 	<div class="collapse navbar-collapse" id="navbarColor01">
 		<ul class="navbar-nav mr-auto">
-			{% if session.logged_in %}
+			{% if session.logged_in and not session.is_admin %}
 			<li class="nav-item">
 				<a class="nav-link" href="{{ url_for('main.feed') }}">Feed</a>
 			</li>
@@ -30,18 +30,19 @@
 			{% endif %}
 		</ul>
 		<ul class="navbar-nav ml-auto">
-			{% if session.logged_in %}
+			{% if session.logged_in %} {% if not session.is_admin %}
 			<li class="nav-item">
 				<a class="nav-link" href="{{ url_for('users.profile') }}"
 					>Profile</a
 				>
 			</li>
+			{% endif %}
 			<li class="nav-item">
 				<a class="nav-link" href="{{ url_for('auth.logout') }}"
 					>Logout</a
 				>
 			</li>
-			{% else %}
+			{% elif not session.logged_in and not session.is_admin %}
 			<li class="nav-item">
 				<a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
 			</li>
