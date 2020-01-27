@@ -1,5 +1,28 @@
 {% extends "layout.html" %} {% block content %}
 
-<h1>Home</h1>
+<!-- <h1>Matcha</h1>
+<h3>Find your perfect match now!</h3>
+<div>
+	<a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+	<a href="{{ url_for('auth.register') }}" class="btn btn-success"
+		>Register</a
+	>
+</div> -->
+<div class="col-md-12 col-lg-7">
+	<h3 style="text-transform: uppercase;">
+		Welcome to Matcha
+	</h3>
+	<p class="mb-5">
+		Your perfect match could be a click away!
+	</p>
+	<p>
+		<a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary"
+			>Login</a
+		>
+		<a href="{{ url_for('auth.register') }}" class="btn btn-outline-success"
+			>Register</a
+		>
+	</p>
+</div>
 
 {% endblock content %}

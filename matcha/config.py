@@ -5,4 +5,3 @@ class Config:
 	MAIL_PORT = 465
 	MAIL_USE_SSL = True
 	MAIL_USERNAME = ''
-	MAIL_PASSWORD = ''
