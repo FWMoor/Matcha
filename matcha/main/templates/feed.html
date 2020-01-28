@@ -1,34 +1,47 @@
 {% extends 'layout.html' %} {% block content %}
 <h2>Feed</h2>
 <div class="row justify-content-around">
-	{% for user in users %}
-	<div class="card col-md-5 feed">
-		{% if user.path %}
-		<img
-			style="height: 250px; width: 100%; display: block;"
-			src="{{ url_for('static', filename='photos/' + user.path) }}"
-			alt="Card image"
-		/>
+	{% if setup %}
+		{{ setup }}
+	{% else %}
+		{% if users %}
+			{% for user in users %}
+			<div class="card col-md-5 feed">
+				{% if user.path %}
+				<img
+					style="height: 250px; width: 100%; display: block;"
+					src="{{ url_for('static', filename='photos/' + user.path) }}"
+					alt="Card image"
+				/>
+				{% else %}
+				<img
+					style="height: 250px; width: 100%; display: block;"
+					src="{{ url_for('static', filename='photos/' + 'default.jpeg') }}"
+					alt="Card image"
+				/>
+				{% endif %}
+				<div class="card-body">
+					<h4 class="card-title">
+						<a href="{{ url_for('users.profile', username=user.username) }}"
+							>{{ user.username }}
+						</a>
+					</h4>
+					<h6 class="card-subtitle mb-2 text-muted">
+						{% if user.age %} {{ user.age }} {% else %} Not Specified
+						{%endif %}
+					</h6>
+					<!-- shhh this is the distance -->
+					<h6 class="card-subtitle mb-2 text-muted">
+						{% if user.distance %} {{ user.distance }} km {% else %} Unknown 
+						{%endif %}
+					</h6>
+				</div>
+			</div>
+			{% endfor %}
 		{% else %}
-		<img
-			style="height: 250px; width: 100%; display: block;"
-			src="{{ url_for('static', filename='photos/' + 'default.jpeg') }}"
-			alt="Card image"
-		/>
+			Sorry, no users were found that match your criteria
 		{% endif %}
-		<div class="card-body">
-			<h4 class="card-title">
-				<a href="{{ url_for('users.profile', username=user.username) }}"
-					>{{ user.username }}
-				</a>
-			</h4>
-			<h6 class="card-subtitle mb-2 text-muted">
-				{% if user.age %} {{ user.age }} {% else %} Not Specified
-				{%endif %}
-			</h6>
-		</div>
-	</div>
-	{% endfor %}
+	{% endif %}
 </div>
 {% endblock %} {% block sidebar %}
 <div class="content-section">
@@ -77,6 +90,27 @@
 						name="max-fame"
 						id="max-fame"
 						max="5"
+						step="0.1"
+					/>
+				</div>
+			</div>
+			<div class="form-row align-items-center">
+				<div class="age-div">
+					<label class="age-label">Min Distance</label>
+					<input
+						type="number"
+						name="min-dist"
+						id="min-dist"
+						min="0"
+						step="0.1"
+					/>
+				</div>
+				<div class="age-div">
+					<label class="age-label">Max Distance</label>
+					<input
+						type="number"
+						name="max-dist"
+						id="max-dist"
 						step="0.1"
 					/>
 				</div>
