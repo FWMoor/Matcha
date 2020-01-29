@@ -103,8 +103,16 @@ function getlocation()
 			var lng =  position.coords.longitude
 			$('#latCord').val(lat)
 			$('#lngCord').val(lng)
+			$.ajax({
+				dataType: "json",
+				url:'http://nominatim.openstreetmap.org/reverse?format=json&lat='+ lat +'&lon=' + lng,
+				success : function(data) {
+					$('#city').val(data['address']['city'])
+				}
+			})
 		},
 		(error) => {
+			console.log(error)
 			ajaxreq()
 		});
 	} else {
@@ -120,6 +128,7 @@ function ajaxreq()
 		success: function(data){
 			$('#latCord').val(data['longitude'])
 			$('#lngCord').val(data['latitude'])
+			$('#city').val(data['city'])
 		}
 	})
 }

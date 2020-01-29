@@ -121,9 +121,13 @@ def login():
 				session['email'] = result['email']
 				session['id'] = result['id']
 				session['msgcnt'] = 0
-				if (result['latCord'] is not None and result['lngCord'] is not None):
+				if (result['latCord'] and result['lngCord'] and result['city']):
 					session['latCord'] = result['latCord']
 					session['lngCord'] = result['lngCord']
+					session['city'] = result['city']
+				else:
+					session['latCord'] = 0
+					session['lngCord'] = 0
 				flash('Welcome back!', 'success')
 				cur.execute("UPDATE users SET lastonline=? WHERE id=?", ["now", session['id']])
 				cur.execute("UPDATE users SET passreset=? WHERE id=?", [None, result['id']])

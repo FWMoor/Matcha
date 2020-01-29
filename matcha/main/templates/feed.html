@@ -38,91 +38,252 @@
 </div>
 {% endblock %} {% block sidebar %}
 <div class="content-section">
-	<form action="" method="POST">
+	<form action="" id="query" method="POST">
 		<fieldset class="form-group">
 			<legend class="border-bottom mb-4">Search</legend>
 			<div class="form-group">
 				<label for="search" class="form-control-label">Search</label>
+				{% if form.search %}
+				<input
+					type="text"
+					name="search"
+					id="search"
+					class="form-control form-control-md"
+					value="{{ form.search }}"
+				/>
+				{% else %}
 				<input
 					type="text"
 					name="search"
 					id="search"
 					class="form-control form-control-md"
 				/>
+				{% endif %}
+			</div>
+			<div class="form-group">
+				<label for="Order">Order By</label>
+				<select name="Order" id="Order">
+					{% if form.Order == "Fame" %}
+					<option selected="selected">Fame</option>
+					{% else %}
+					<option>Fame</option>
+					{% endif %} {% if form.Order == "Distance" %}
+					<option selected="selected">Distance</option>
+					{% else %}
+					<option>Distance</option>
+					{% endif %} {% if form.Order == "Age" %}
+					<option selected="selected">Age</option>
+					{% else %}
+					<option>Age</option>
+					{% endif %} {% if form.Order == "Username" %}
+					<option selected="selected">Username</option>
+					{% else %}
+					<option>Username</option>
+					{% endif %}
+				</select>
 			</div>
 			<div class="form-row align-items-center">
 				<div class="age-div">
 					<label class="age-label">Min Age</label>
-					<input type="number" name="min-age" id="min-age" min="10" />
+					{% if form.MinAge %}
+					<input
+						type="number"
+						name="MinAge"
+						id="MinAge"
+						min="10"
+						value="{{ form.MinAge }}"
+					/>
+					{% else %}
+					<input type="number" name="MinAge" id="MinAge" min="10" />
+					{% endif %}
 				</div>
 				<div class="age-div">
 					<label class="age-label">Max Age</label>
+					{% if form.MaxAge %}
 					<input
 						type="number"
-						name="max-age"
-						id="max-age"
+						name="MaxAge"
+						id="MaxAge"
 						max="100"
+						value="{{ form.MaxAge }}"
 					/>
+					{% else %}
+					<input type="number" name="MaxAge" id="MaxAge" max="100" />
+					{% endif %}
 				</div>
 			</div>
 			<div class="form-row align-items-center">
 				<div class="age-div">
 					<label class="age-label">Min Fame</label>
+					{% if form.MinFame %}
 					<input
 						type="number"
-						name="min-fame"
-						id="min-fame"
+						name="MinFame"
+						id="MinFame"
+						min="0"
+						step="0.1"
+						value="{{ form.MinFame }}"
+					/>
+					{% else %}
+					<input
+						type="number"
+						name="MinFame"
+						id="MinFame"
 						min="0"
 						step="0.1"
 					/>
+					{% endif %}
 				</div>
 				<div class="age-div">
 					<label class="age-label">Max Fame</label>
+					{% if form.MaxFame %}
 					<input
 						type="number"
-						name="max-fame"
-						id="max-fame"
+						name="MaxFame"
+						id="MaxFame"
+						max="5"
+						step="0.1"
+						value="{{ form.MaxFame }}"
+					/>
+					{% else %}
+					<input
+						type="number"
+						name="MaxFame"
+						id="MaxFame"
 						max="5"
 						step="0.1"
 					/>
+					{% endif %}
 				</div>
 			</div>
 			<div class="form-row align-items-center">
 				<div class="age-div">
 					<label class="age-label">Min Distance</label>
+					{% if form.MinDist %}
 					<input
 						type="number"
-						name="min-dist"
-						id="min-dist"
+						name="MinDist"
+						id="MinDist"
+						min="0"
+						step="0.1"
+						value="{{ form.MinDist }}"
+					/>
+					{% else %}
+					<input
+						type="number"
+						name="MinDist"
+						id="MinDist"
 						min="0"
 						step="0.1"
 					/>
+					{% endif %}
 				</div>
 				<div class="age-div">
 					<label class="age-label">Max Distance</label>
+					{% if form.MaxDist %}
 					<input
 						type="number"
-						name="max-dist"
-						id="max-dist"
+						name="MaxDist"
+						id="MaxDist"
+						step="0.1"
+						value="{{ form.MaxDist }}"
+					/>
+					{% else %}
+					<input
+						type="number"
+						name="MaxDist"
+						id="MaxDist"
 						step="0.1"
 					/>
+					{% endif %}
+				</div>
+				<div class="form-group">
+					<label for="city" class="form-control-label">city</label>
+					{% if form.city %}
+					<input
+						type="text"
+						name="city"
+						id="city"
+						class="form-control form-control-md"
+						value="{{ form.city }}"
+					/>
+					{% else %}
+					<input
+						type="text"
+						name="city"
+						id="city"
+						class="form-control form-control-md"
+					/>
+					{% endif %}
 				</div>
 			</div>
 			<div class="form-check">
+				{% if form.tags %}
+				<input
+					type="checkbox"
+					name="tags"
+					id="tags"
+					class="form-check-input"
+					checked="True"
+				/>
+				{% else %}
 				<input
 					type="checkbox"
 					name="tags"
 					id="tags"
 					class="form-check-input"
 				/>
+				{% endif %}
 				<label for="tags" class="form-check-label">Same tags</label>
 			</div>
 		</fieldset>
-		<div class="form-group d-flex justify-content-between">
-			<button type="submit" class="btn btn-outline-primary">
+		<div id="SubmitForm" class="form-group d-flex justify-content-between">
+			{% if not session.page %}
+			<button
+				type="submit"
+				class="btn btn-outline-primary"
+				name="submit"
+				value="Search"
+			>
 				Search
 			</button>
+			{% else %}
+			<button
+				type="submit"
+				class="btn btn-outline-primary"
+				name="submit"
+				value="Previous"
+			>
+				Previous
+			</button>
+			<label>
+				{{ session.page }}
+			</label>
+			<button
+				type="submit"
+				class="btn btn-outline-primary"
+				name="submit"
+				value="Next"
+			>
+				Next
+			</button>
+			{% endif %}
 		</div>
 	</form>
 </div>
+<script>
+	function change() {
+		document.getElementById("SubmitForm").innerHTML =
+			"<button type='submit' class='btn btn-outline-primary' name='submit' value='Search'>Search</button>";
+	}
+
+	var inputs = document.getElementsByTagName("input");
+	for (i = 0; i < inputs.length; i++) {
+		// inputs[i].onchange = change;
+		inputs[i].onfocusout = change;
+	}
+
+	var select = document.getElementById("Order");
+	select.onchange = change;
+</script>
 {% endblock %}

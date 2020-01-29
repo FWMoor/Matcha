@@ -93,6 +93,7 @@ def setup_tables():
 		passreset TEXT,
 		lngCord REAL,
 		latCord REAL,
+		city TEXT,
 		totalviews INTEGER NOT NULL DEFAULT 0
 		);""")
 	con.commit()

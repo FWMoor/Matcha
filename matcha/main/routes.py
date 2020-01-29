@@ -8,6 +8,8 @@ from math import sin, cos, atan2, sqrt, pi
 main = Blueprint('main', __name__,
 				template_folder='./templates', static_folder='static')
 
+AMOUNT_PER_PAGE = 5
+
 @main.route('/')
 @not_logged_in
 def home():
@@ -92,18 +94,26 @@ def feed():
 			else:
 				wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
 	else:
-		return render_template('feed.html', setup="Please complete your profile get your match")
+		return render_template('feed.html', setup="Please complete your profile get your match",form=request.form)
 
 	# get Suggested users
 	if request.method == 'GET':
-		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1', [session['id']])
+		cur.execute('SELECT * FROM users WHERE NOT id=? AND NOT id=1 AND complete=1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
 		tmp = cur.fetchall()
 
 	# custom search
-	if request.method == 'POST':
-		# if user is all setup
+	elif request.method == 'POST':
+		# pagination
+		if (request.form['submit'] == 'Search'):
+			session['page'] = 1
+		elif (request.form['submit'] == 'Next'):
+			session['page'] += 1
+		elif (request.form['submit'] == "Previous"):
+			if (session['page'] > 1):
+				session['page'] -= 1
+
 		data = []
-		SQL = 'SELECT * FROM users WHERE NOT id=? AND NOT id = 1'
+		SQL = 'SELECT * FROM users WHERE NOT id=? AND NOT id = 1 AND complete=1'
 		data.append(session['id'])
 		
 		#gender
@@ -111,47 +121,71 @@ def feed():
 		data.append(wanted_sexuality)
 		data.append(user['sexuality'])
 
-		if request.form['min-age']:
+		if request.form['MinAge']:
 			SQL += " AND age >= ?"
-			data.append(request.form['min-age'])
+			data.append(request.form['MinAge'])
 
-		if request.form['max-age']:
+		if request.form['MaxAge']:
 			SQL += " AND age <= ?"
-			data.append(request.form['max-age'])
+			data.append(request.form['MaxAge'])
 
-		if request.form['min-fame']:
+		if request.form['MinFame']:
 			SQL += " AND fame >= ?"
-			data.append(request.form['min-fame'])
+			data.append(request.form['MinFame'])
 
-		if request.form['max-fame']:
+		if request.form['MaxFame']:
 			SQL += " AND fame <= ?"
-			data.append(request.form['max-fame'])
+			data.append(request.form['MaxFame'])
 
 		if request.form.get('tags') == 'on':
 			SQL += " AND id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?))"
 			data.append(session['id'])
 
 		if request.form['search']:
-			SQL += " AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%')"
+			SQL += " AND (UPPER(username) LIKE '%" + request.form['search'].upper() + "%' OR UPPER(fname) LIKE '%" + request.form['search'].upper() + "%' OR UPPER(lname) LIKE '%" + request.form['search'].upper() + "%')"
+
+		if request.form['city']:
+			SQL += ' AND city = ? '
+			data.append(request.form['city'])
 		
 		# SQL += ' AND complete=1'
+		if request.form['Order']:
+			if request.form['Order'] == "Username":
+				SQL += ' ORDER BY username ASC'
+			elif request.form['Order'] == "Age":
+				SQL += ' ORDER BY age ASC'
+			elif request.form['Order'] == "Fame":
+				SQL += ' ORDER BY fame ASC'
+			elif request.form['Order'] != 'Distance':
+				print(request.form['Order'] + ' Cant be sorted by !')
+
+		SQL += ' LIMIT ?, ?'
+		data.append(((session['page'] - 1) * AMOUNT_PER_PAGE ))
+		data.append(AMOUNT_PER_PAGE)
+
+		print( '\n\n\n\n\n\n\n\n\n\n' + SQL)
+
 		cur.execute(SQL, data)
 		tmp = cur.fetchall()
 
 		con.close()
 
-		if request.form['max-dist']:
-			maxdist = float(request.form['max-dist'])
+		if request.form['MaxDist']:
+			maxdist = float(request.form['MaxDist'])
 		
-		if request.form['min-dist']:
-			mindist = float(request.form['min-dist'])
+		if request.form['MinDist']:
+			mindist = float(request.form['MinDist'])
 
 	for user in tmp:
-		user['distance'] = getdist(user['latCord'], user['lngCord'])
-		if user['distance'] <= maxdist and user['distance'] >= mindist:
-			users.append(user)
-	
+		if user['latCord'] and user['lngCord']:
+			user['distance'] = getdist(user['latCord'], user['lngCord'])
+			if user['distance'] <= maxdist and user['distance'] >= mindist:
+				users.append(user)
+
+		# sort by distance
+		if (request.method == 'POST' and request.form['Order'] == 'Distance'):
+			users = sorted(users, key=lambda k: user['distance'])
 	try:
-		return render_template('feed.html', users=users)
+		return render_template('feed.html', users=users, form=request.form)
 	except TemplateNotFound:
 		abort(404)
