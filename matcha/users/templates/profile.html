@@ -7,12 +7,15 @@
 			<div class="media-body">
 				<h2 class="account-heading">{{ user.username }}</h2>
 				<h4>{{ user.fname }} {{ user.lname }}</h4>
-				<p class="text-secondary">{{ user.email }}</p>
 			</div>
 		</div>
 	</div>
 	<div>
+		{% if not user.username or session.username == user.username.lower() %}
+		<legend class="border-bottom mb-4">Bio<a href="{{ url_for('users.edit') }}" class="float-right page-links text-primary">Edit</a></legend>
+		{% else %}
 		<legend class="border-bottom mb-4">Bio</legend>
+		{% endif %}
 		{% if user.bio %}
 		<span style="word-break: break-word;">{{ user.bio }}</span>
 		{% else %}
@@ -21,7 +24,11 @@
 	</div>
 	<br>
 	<div>
+		{% if not user.username or session.username == user.username.lower() %}
+		<legend class="border-bottom mb-4">Info<a href="{{ url_for('users.edit') }}" class="float-right page-links text-primary">Edit</a></legend>
+		{% else %}
 		<legend class="border-bottom mb-4">Info</legend>
+		{% endif %}
 		<div>
 			<p class="info-heads"><b>Age:</b></p>
 			{% if age > 0 %}
@@ -63,7 +70,11 @@
 		<br>
 	</div>
 	<div>
+		{% if not user.username or session.username == user.username.lower() %}
+		<legend class="border-bottom mb-4">Tags<a href="{{ url_for('users.tags') }}" class="float-right page-links text-primary">Edit</a></legend>
+		{% else %}
 		<legend class="border-bottom mb-4">Tags</legend>
+		{% endif %}
 		{% if tags %}
 			<span style="word-break: break-word;">
 			{% for tag in tags %}
@@ -84,7 +95,7 @@
 			<img
 				alt="picture"
 				src="{{url_for('static', filename='photos/' + pic.path)}}"
-				class="img-fluid img-thumbnail"
+				class="user-pics"
 			/>
 			{% if not user.username or session.username == user.username.lower() %}
 			<a href="{{ url_for('users.set_pic', photoId=pic.id) }}" class="btn btn-primary">Set AVI</a>

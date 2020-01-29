@@ -1,7 +1,7 @@
 {% extends "layout.html" %} {% block content %}
 
 <div class="content-section">
-	<h1>Tags</h1>
+	<h1>Tags<a href="{{ url_for('users.profile') }}" class="float-right page-links text-primary">Back</a></h1>
 	<div>
 		<legend class="border-bottom mb-4">Popular Tags</legend>
 		{% for pop in popular %}
