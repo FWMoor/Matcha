@@ -177,10 +177,11 @@ def edit():
 				data = request.form.get('birthdate').split("-")
 				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
 				#let user update location removed notif cuz it be useless
-			if (request.form.get('latCord') and request.form.get('lngCord')):
-				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'), session['id']])
+			if (request.form.get('latCord') and request.form.get('lngCord') and request.form.get('city')):
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=?, city=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'),request.form.get('city'), session['id']])
 				session['latCord'] = request.form.get('latCord')
 				session['lngCord'] = request.form.get('lngCord')
+				session['city'] = request.form.get('city')
 			else:
 				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), session['id']])
 			con.commit()

@@ -45,8 +45,9 @@
 </div>
 {% endblock %} {% block sidebar %}
 <div class="content-section">
-	<form action="" method="POST">
+	<form action="" id="query" method="POST">
 		<fieldset class="form-group">
+
 			<legend class="border-bottom mb-4">Search</legend>
 			<div class="form-group">
 				<label for="search" class="form-control-label">Search</label>
@@ -55,20 +56,50 @@
 					name="search"
 					id="search"
 					class="form-control form-control-md"
+					{% if form.search %}
+						value = '{{ form.search }}'
+					{% endif %}
 				/>
 			</div>
+
+			<div class="form-group">
+				<label for="Order" >Order By</label>
+				<select name="Order" id= "Order">
+					<option {% if form.Order == "Fame" %} selected="selected"{% endif %}>
+						Fame</option>
+					<option {% if form.Order == "Distance" %} selected="selected"{% endif %}>
+						Distance</option>
+					<option {% if form.Order == "Age" %} selected="selected"{% endif %}>
+						Age</option>
+					<option {% if form.Order == "Username" %} selected="selected"{% endif %}>
+						Username</option>
+				  </select>
+			</div>
+			
+				
 			<div class="form-row align-items-center">
 				<div class="age-div">
 					<label class="age-label">Min Age</label>
-					<input type="number" name="min-age" id="min-age" min="10" />
+					<input
+						type="number"
+						name="MinAge"
+						id="MinAge"
+						min="10"
+						{% if form.MinAge %}
+							value = '{{ form.MinAge }}'
+						{% endif %}
+					/>
 				</div>
 				<div class="age-div">
 					<label class="age-label">Max Age</label>
 					<input
 						type="number"
-						name="max-age"
-						id="max-age"
+						name="MaxAge"
+						id="MaxAge"
 						max="100"
+						{% if form.MaxAge %}
+							value = '{{ form.MaxAge }}'
+						{% endif %}
 					/>
 				</div>
 			</div>
@@ -77,20 +108,26 @@
 					<label class="age-label">Min Fame</label>
 					<input
 						type="number"
-						name="min-fame"
-						id="min-fame"
+						name="MinFame"
+						id="MinFame"
 						min="0"
 						step="0.1"
+						{% if form.MinFame %}
+							value = '{{ form.MinFame }}'
+						{% endif %}
 					/>
 				</div>
 				<div class="age-div">
 					<label class="age-label">Max Fame</label>
 					<input
 						type="number"
-						name="max-fame"
-						id="max-fame"
+						name="MaxFame"
+						id="MaxFame"
 						max="5"
 						step="0.1"
+						{% if form.MaxFame %}
+							value = '{{ form.MaxFame }}'
+						{% endif %}
 					/>
 				</div>
 			</div>
@@ -99,37 +136,90 @@
 					<label class="age-label">Min Distance</label>
 					<input
 						type="number"
-						name="min-dist"
-						id="min-dist"
+						name="MinDist"
+						id="MinDist"
 						min="0"
 						step="0.1"
+						{% if form.MinDist %}
+							value = '{{ form.MinDist }}'
+						{% endif %}
 					/>
 				</div>
 				<div class="age-div">
 					<label class="age-label">Max Distance</label>
 					<input
 						type="number"
-						name="max-dist"
-						id="max-dist"
+						name="MaxDist"
+						id="MaxDist"
 						step="0.1"
+						{% if form.MaxDist %}
+							value = '{{ form.MaxDist }}'
+						{% endif %}
+					/>
+				</div>
+
+				<div class="form-group">
+					<label for="city" class="form-control-label">city</label>
+					<input
+						type="text"
+						name="city"
+						id="city"
+						class="form-control form-control-md"
+						{% if form.city %}
+							value = '{{ form.city }}'
+						{% endif %}
 					/>
 				</div>
 			</div>
+
 			<div class="form-check">
 				<input
 					type="checkbox"
 					name="tags"
 					id="tags"
 					class="form-check-input"
+					{% if form.tags %}
+						checked="True"
+					{% endif %}
 				/>
 				<label for="tags" class="form-check-label">Same tags</label>
 			</div>
 		</fieldset>
-		<div class="form-group d-flex justify-content-between">
-			<button type="submit" class="btn btn-outline-primary">
-				Search
+		<!-- Buttons for search -->
+		<div id="SubmitForm" class="form-group d-flex justify-content-between">
+			{% if not session.page %}				
+				<button type="submit" class="btn btn-outline-primary" name="submit" value="Search">
+					Search
+				</button>
+			{% else %}
+			<button type="submit" class="btn btn-outline-primary" name="submit" value="Previous">
+				Previous
 			</button>
-		</div>
+			<label>
+				{{ session.page }}
+			</label>
+			<button type="submit" class="btn btn-outline-primary" name="submit" value="Next">
+					Next
+			</button>
+			{% endif %}
+		</div>		
 	</form>
 </div>
+
+<script>
+function change()
+{
+	document.getElementById("SubmitForm").innerHTML = "<button type='submit' class='btn btn-outline-primary' name='submit' value='Search'>Search</button>"
+}
+
+var inputs = document.getElementsByTagName("input"); 
+for (i=0; i<inputs.length; i++){
+	// inputs[i].onchange = change;
+	inputs[i].onfocusout = change;
+}
+
+var select = document.getElementById("Order");
+	select.onchange = change
+
+</script>
 {% endblock %}
