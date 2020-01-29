@@ -144,11 +144,11 @@ a.article-title:hover {
 }
 
 .seen {
-	color: chartreuse;
+	color: #2687a0
 }
 
 .unseen {
-	color: firebrick;
+	color: rgb(77, 77, 77);
 }
 
 .messages {

@@ -186,7 +186,7 @@ def feed():
 
 	# get Suggested users
 	if request.method == 'GET':
-		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
+		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 AND complete=1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
 		users = cur.fetchall()
 		con.close()
 
