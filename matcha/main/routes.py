@@ -3,9 +3,11 @@ from jinja2 import TemplateNotFound
 from matcha.db import db_connect, dict_factory
 
 from matcha.decorators import not_logged_in, is_logged_in, is_admin
-
+from math import sin, cos, atan2, sqrt, pi
 main = Blueprint('main', __name__,
 				template_folder='./templates', static_folder='static')
+
+AMOUNT_PER_PAGE = 5
 
 @main.route('/')
 @not_logged_in
@@ -58,54 +60,137 @@ def remove_report(reportedId):
 	except TemplateNotFound:
 		abort(404)
 
+def deg2radiant(deg):
+	return deg * (pi / 180)
+
+def getdist(lat, lng):
+	lat2 = float(session['latCord'])
+	lng2 = float(session['lngCord'])
+	R = 6371
+	dLat = deg2radiant(lat2-lat)
+	dLng = deg2radiant(lng2-lng)
+	a = sin(dLat/2) * sin(dLat/2) + cos(deg2radiant(lat)) * cos(deg2radiant(lat2)) * sin(dLng/2) * sin(dLng/2)
+	c = 2 * atan2(sqrt(a), sqrt(1-a))
+	d = R * c
+	return round(d,4)
+
 @main.route('/feed', methods=['GET', 'POST'])
 @is_logged_in
 def feed():
+	maxdist = 2147483647
+	mindist = 0
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
 	cur.execute("SELECT * FROM users WHERE id=?", [session['id']])
 	user = cur.fetchone()
-	if request.method == 'POST':
-		minage = request.form['min-age'] if request.form['min-age'] else '0'
-		maxage = request.form['max-age'] if request.form['max-age'] else '412414'
-		minfame = request.form['min-fame'] if request.form['min-fame'] else '0'
-		maxfame = request.form['max-fame'] if request.form['max-fame'] else '5'
-		if user['gender'] and (user['gender'] == 'M' or user['gender'] == 'F'):
-			if user['sexuality'] == 'S' or user['sexuality'] == 'G':
-				if user['sexuality'] == 'S':
-					wanted_sexuality = 'M' if user['gender'] == 'F' else 'F'
-				else:
-					wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
-				if request.form.get('tags') == 'on':
-					cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND gender=? AND sexuality=? AND complete=1", [session['id'], session['id'], wanted_sexuality, user['sexuality']])
-				else:
-					cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND gender=? AND sexuality=?", [wanted_sexuality, user['sexuality']])
+	#get the current user :)
+	if user['gender'] and (user['gender'] == 'M' or user['gender'] == 'F'):
+		if user['sexuality'] == 'S' or user['sexuality'] == 'G':
+			if user['sexuality'] == 'S':
+				wanted_sexuality = 'M' if user['gender'] == 'F' else 'F'
 			else:
-				if request.form.get('tags') == 'on':
-					cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND (gender=? OR gender=?) AND complete=1", [session['id'], session['id'], 'M', 'F'])
-				else:
-					cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND (gender=? OR gender=?)", ['F', 'M'])
-		else:
-			if request.form.get('tags') == 'on':
-				cur.execute("SELECT * FROM users WHERE id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?)) AND NOT id=? AND (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND complete=1", [session['id'], session['id']])
-			else:
-				cur.execute("SELECT * FROM users WHERE (username LIKE '%" + request.form['search'] + "%' OR fname LIKE '%" + request.form['search'] + "%' OR lname LIKE '%" + request.form['search'] + "%') AND (age >= " + minage + " AND age <= " + maxage + ") AND (fame >= " + minfame + " AND fame <= " + maxfame + ") AND NOT UPPER(username)='SYSTEM' AND complete=1")
+				wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
 	else:
-		if user['gender'] and (user['gender'] == 'M' or user['gender'] == 'F'):
-			if user['sexuality'] == 'S' or user['sexuality'] == 'G':
-				if user['sexuality'] == 'S':
-					wanted_sexuality = 'M' if user['gender'] == 'F' else 'F'
-				else:
-					wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
-				cur.execute("SELECT * FROM users WHERE NOT id=? AND gender=? AND sexuality=? AND NOT UPPER(username)=? AND complete=1", [session['id'], wanted_sexuality, user['sexuality'], 'SYSTEM'])
-			else:
-				cur.execute("SELECT * FROM users WHERE NOT id=? AND (gender=? OR gender=?) AND NOT UPPER(username)=? AND complete=1", [session['id'], 'M', 'F', 'SYSTEM'])
-		else:
-			cur.execute("SELECT * FROM users WHERE NOT id=? AND NOT UPPER(username)=? AND complete=1", [session['id'], 'SYSTEM'])
-	users = cur.fetchall()
-	con.close()
+		return render_template('feed.html', setup="Please complete your profile get your match",form=request.form)
+
+	# custom search
+	if request.method == 'POST':
+		# pagination
+		if (request.form['submit'] == 'Search'):
+			session['page'] = 1
+
+		data = []
+		SQL = 'SELECT * FROM users WHERE NOT id=? AND NOT id = 1 AND complete=1'
+		data.append(session['id'])
+		
+		#gender
+		SQL += ' AND gender=? AND sexuality=?'
+		data.append(wanted_sexuality)
+		data.append(user['sexuality'])
+
+		if request.form['MinAge']:
+			SQL += " AND age >= ?"
+			data.append(request.form['MinAge'])
+
+		if request.form['MaxAge']:
+			SQL += " AND age <= ?"
+			data.append(request.form['MaxAge'])
+
+		if request.form['MinFame']:
+			SQL += " AND fame >= ?"
+			data.append(request.form['MinFame'])
+
+		if request.form['MaxFame']:
+			SQL += " AND fame <= ?"
+			data.append(request.form['MaxFame'])
+
+		if request.form.get('tags') == 'on':
+			SQL += " AND id IN (SELECT userId FROM usertags WHERE tagId IN (SELECT tagId FROM usertags WHERE userId=?))"
+			data.append(session['id'])
+
+		if request.form['search']:
+			SQL += " AND (UPPER(username) LIKE '%" + request.form['search'].upper() + "%' OR UPPER(fname) LIKE '%" + request.form['search'].upper() + "%' OR UPPER(lname) LIKE '%" + request.form['search'].upper() + "%')"
+
+		if request.form['city']:
+			SQL += ' AND city = ? '
+			data.append(request.form['city'])
+
+		# SQL += ' AND complete=1'
+		if request.form['Order']:
+			if request.form['Order'] == "Username":
+				SQL += ' ORDER BY username ASC'
+			elif request.form['Order'] == "Age":
+				SQL += ' ORDER BY age ASC'
+			elif request.form['Order'] == "Fame":
+				SQL += ' ORDER BY fame ASC'
+			elif request.form['Order'] != 'Distance':
+				print(request.form['Order'] + ' Cant be sorted by !')
+	
+		cur.execute(SQL, data)
+		tmp = cur.fetchall()
+		temp = []
+		users = []
+		# no pagination
+
+		if request.form['MaxDist']:
+			maxdist = float(request.form['MaxDist'])
+		
+		if request.form['MinDist']:
+			mindist = float(request.form['MinDist'])
+
+		for user in tmp:
+			user['distance'] = getdist(user['latCord'], user['lngCord'])
+			if user['distance'] <= maxdist and user['distance'] >= mindist:
+				temp.append(user)
+			# sort by distance
+		if (request.method == 'POST' and request.form['Order'] == 'Distance'):
+			temp = sorted(temp, key=lambda user: user['distance'])
+		
+		#for bug that fred showed add stop
+		start = (session['page'] - 1) * AMOUNT_PER_PAGE
+		stop = start + AMOUNT_PER_PAGE
+		if (request.form['submit'] == 'Next'):
+			if (len(temp) >= stop):
+				session['page'] += 1
+
+		if (request.form['submit'] == "Previous"):
+			if (session['page'] > 1):
+				session['page'] -= 1
+		# for update
+		start = (session['page'] - 1) * AMOUNT_PER_PAGE
+		stop = start + AMOUNT_PER_PAGE
+		users = (temp[start:stop])
+		con.close()
+
+
+	# get Suggested users
+	if request.method == 'GET':
+		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
+		users = cur.fetchall()
+		con.close()
+
 	try:
-		return render_template('feed.html', users=users)
+		return render_template('feed.html', users=users, form=request.form)
 	except TemplateNotFound:
 		abort(404)

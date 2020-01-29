@@ -22,6 +22,7 @@ def get_age(birthDate):
 	return age
 
 def update_fame_rating(id):
+	total = getprofileviews(id)
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("SELECT * FROM likes WHERE user2=?", [id])
@@ -30,9 +31,6 @@ def update_fame_rating(id):
 	cur.execute("SELECT * FROM matches WHERE user2=? OR user1=?", [id, id])
 	match = cur.fetchall()
 	matches = len(match)
-	cur.execute("SELECT * FROM users WHERE NOT id=?", [id])
-	tot = cur.fetchall()
-	total = len(tot)
 	if (total > 0):
 		fame = (likes + matches) / total * 5
 	else:
@@ -62,6 +60,26 @@ def save_picture(form_picture):
 	else:
 		flash('Unsupported extention type!', 'danger')
 		return 'Empty'
+
+def getprofileviews(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT totalviews as count FROM users WHERE id=?", [id])
+	result = cur.fetchone()
+	con.close()
+	return result['count']
+
+def addprofileviews(id):
+	views = getprofileviews(id) + 1
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute(
+	"""UPDATE users SET totalviews = ?
+		WHERE id = ?""",
+		[views, id])
+	con.commit()
+	con.close()
 
 @users.route('/profile', defaults={'username': None}, methods=['GET', 'POST'])
 @users.route('/profile/<username>', methods=['GET', 'POST'])
@@ -124,6 +142,15 @@ def profile(username):
 				like = cur.fetchone()
 				liked = 1 if like != None else 0
 		con.close()
+
+		#update profile views
+		referrer = request.referrer
+		if (username != session['username']):
+			if (request.url != referrer):
+				data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
+				sysmsg(data)
+				addprofileviews(result['id'])
+
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
 		try:
@@ -147,7 +174,6 @@ def edit():
 	con.row_factory = dict_factory
 	cur = con.cursor()
 	if request.method == 'POST':
-		notif = 1 if request.form.get('notifications') else 0
 		cur.execute("SELECT * FROM users WHERE (username=? OR email=?) AND NOT id=?", [request.form.get('username'), request.form.get('email'), session['id']])
 		results = cur.fetchall()
 		if results:
@@ -157,13 +183,21 @@ def edit():
 			if request.form.get('birthdate'):
 				data = request.form.get('birthdate').split("-")
 				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), notif, session['id']])
+				#let user update location removed notif cuz it be useless
+			if (request.form.get('latCord') and request.form.get('lngCord') and request.form.get('city')):
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=?, city=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'),request.form.get('city'), session['id']])
+				session['latCord'] = request.form.get('latCord')
+				session['lngCord'] = request.form.get('lngCord')
+				session['city'] = request.form.get('city')
+			else:
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
 			session['fname'] = request.form.get('fname')
 			session['lname'] = request.form.get('lname')
 			session['email'] = request.form.get('email')
+			
 			try:
 				flash('Profile was updated!', 'success')
 				return redirect(url_for('users.profile', username=request.form.get('username')))
@@ -288,7 +322,7 @@ def block_user(userId):
 		flash('User has been unblocked!', 'success')
 	else:
 		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
-		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=? AND user1 <> 1", [session['id'], userId])
 		# set system msg if blocked
 		con.commit()
 		con.close()
@@ -326,8 +360,8 @@ def like_user(userId):
 	user = cur.fetchone()
 	cur.execute("SELECT * FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
 	result = cur.fetchone()
-	if result:
-		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+	if (result and userId != 1):
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=? AND user1 <> 1", [session['id'], userId])
 		flash('User has been unliked!', 'success')
 		# set system message if unliked
 		con.commit()
@@ -336,13 +370,13 @@ def like_user(userId):
 		sysmsg(data)
 	else:
 		cur.execute("INSERT INTO likes (user1, user2) VALUES (?, ?)", [session['id'], userId])
-		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
+		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=? AND userId <> 1", [session['id'], userId])
 		con.commit()
-		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 		matched = cur.fetchall()
 		if len(matched) == 2:
 			cur.execute("INSERT INTO matches (user1, user2) VALUES (?, ?)", [session['id'], userId])
-			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 			# set system message if matched
 			con.commit()
 			con.close()
@@ -370,7 +404,7 @@ def match_user(userId):
 	cur.execute("SELECT * FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
 	result = cur.fetchone()
 	if result:
-		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 		con.commit()
 		con.close()
 		data = {'id': userId, "message":session['username'] + " unmatched you"}
