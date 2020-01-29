@@ -7,20 +7,13 @@
 			<div class="media-body">
 				<h2 class="account-heading">{{ user.username }}</h2>
 				<h4>{{ user.fname }} {{ user.lname }}</h4>
+				{% if user.bio %}
+				<span style="word-break: break-word;">{{ user.bio }}</span>
+				{% else %}
+				<span style="word-break: break-word;">No bio given</span>
+				{% endif %}
 			</div>
 		</div>
-	</div>
-	<div>
-		{% if not user.username or session.username == user.username.lower() %}
-		<legend class="border-bottom mb-4">Bio<a href="{{ url_for('users.edit') }}" class="float-right page-links text-primary">Edit</a></legend>
-		{% else %}
-		<legend class="border-bottom mb-4">Bio</legend>
-		{% endif %}
-		{% if user.bio %}
-		<span style="word-break: break-word;">{{ user.bio }}</span>
-		{% else %}
-		<span style="word-break: break-word;">No bio given</span>
-		{% endif %}
 	</div>
 	<br>
 	<div>
