@@ -37,6 +37,11 @@ def setup_tables():
 		user2	INTEGER NOT NULL
 	);""")
 	con.commit()
+	cur.execute("""CREATE TABLE IF NOT EXISTS views (
+		viewed	INTEGER NOT NULL,
+		viewedBy	INTEGER NOT NULL
+	);""")
+	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS messages (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		matchId INTEGER NOT NULL,
@@ -45,13 +50,6 @@ def setup_tables():
 		message TEXT NOT NULL,
 		time TEXT NOT NULL,
 		seen INTEGER DEFAULT 0
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS notifications (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		userId INTEGER NOT NULL,
-		notificationFrom INTEGER NOT NULL,
-		notification TEXT NOT NULL
 	);""")
 	con.commit()
 	cur.execute("""CREATE TABLE IF NOT EXISTS photos (
@@ -87,14 +85,15 @@ def setup_tables():
 		path TEXT,
 		sexuality TEXT DEFAULT 'S',
 		tags TEXT,
-		location TEXT,
 		complete INTEGER DEFAULT 0,
-		notifications INTERGER NOT NULL DEFAULT 1,
 		fame INTEGER NOT NULL DEFAULT 0,
 		online INTEGER NOT NULL DEFAULT 0,
 		lastonline TEXT,
 		birthdate TEXT,
-		passreset TEXT
+		passreset TEXT,
+		lngCord REAL,
+		latCord REAL,
+		totalviews INTEGER NOT NULL DEFAULT 0
 		);""")
 	con.commit()
 	con.close()

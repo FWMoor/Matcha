@@ -22,17 +22,16 @@ def get_age(birthDate):
 	return age
 
 def update_fame_rating(id):
+	total = getprofileviews(id)
+	print(total)
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("SELECT * FROM likes WHERE user2=?", [id])
 	like = cur.fetchall()
 	likes = len(like)
-	cur.execute("SELECT * FROM matches WHERE user2=? OR user1=?", [id, id])
+	cur.execute("SELECT * FROM matches WHERE (user2=? OR user1=?) AND NOT (user1=1 OR user2=1)", [id, id])
 	match = cur.fetchall()
 	matches = len(match)
-	cur.execute("SELECT * FROM users WHERE NOT id=?", [id])
-	tot = cur.fetchall()
-	total = len(tot)
 	if (total > 0):
 		fame = (likes + matches) / total * 5
 	else:
@@ -40,7 +39,7 @@ def update_fame_rating(id):
 	cur.execute("UPDATE users SET fame=? WHERE id=?", [round(fame, 1), id])
 	con.commit()
 	con.close()
-	return likes + matches
+	return round(fame, 1)
 
 def get_id_from_username(username):
 	con = db_connect()
@@ -63,6 +62,26 @@ def save_picture(form_picture):
 		flash('Unsupported extention type!', 'danger')
 		return 'Empty'
 
+def getprofileviews(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT viewedBy as count FROM views WHERE viewed=? AND NOT viewed=1", [id])
+	result = cur.fetchall()
+	con.close()
+	return len(result)
+
+def addprofileviews(id):
+	views = getprofileviews(id) + 1
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute(
+	"""UPDATE users SET totalviews = ?
+		WHERE id = ?""",
+		[views, id])
+	con.commit()
+	con.close()
+
 @users.route('/profile', defaults={'username': None}, methods=['GET', 'POST'])
 @users.route('/profile/<username>', methods=['GET', 'POST'])
 @is_admin_or_logged_in
@@ -81,6 +100,12 @@ def profile(username):
 			isblocked = cur.fetchone()
 			if isblocked:
 				abort(404)
+			else:
+				cur.execute("SELECT * FROM views WHERE viewed=? AND viewedBy=?", [result['id'], session['id']])
+				view = cur.fetchone()
+				if not view:
+					cur.execute("INSERT INTO views VALUES (?, ?)", [result['id'], session['id']])
+					con.commit()
 		if request.method == 'POST':
 			cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
 			tot = cur.fetchall()
@@ -124,17 +149,22 @@ def profile(username):
 				like = cur.fetchone()
 				liked = 1 if like != None else 0
 		con.close()
+		#update profile views
+		referrer = request.referrer
+		if (username != session['username']):
+			data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
+			sysmsg(data)
+			addprofileviews(result['id'])
 		image = profile['path'] if profile != None else 'default.jpeg'
 		image_file = url_for('static', filename='photos/' + image)
 		try:
 			if result['password']:
 				del result['password']
-			update_fame_rating(result['id'])
 			if result['age']:
 				age = result['age']
 			else:
 				age = 0
-			return render_template('profile.html', user=result, profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age, tags=tags)
+			return render_template('profile.html', user=result, fame=update_fame_rating(result['id']), profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age, tags=tags)
 		except TemplateNotFound:
 			abort(404)
 	else:
@@ -147,7 +177,6 @@ def edit():
 	con.row_factory = dict_factory
 	cur = con.cursor()
 	if request.method == 'POST':
-		notif = 1 if request.form.get('notifications') else 0
 		cur.execute("SELECT * FROM users WHERE (username=? OR email=?) AND NOT id=?", [request.form.get('username'), request.form.get('email'), session['id']])
 		results = cur.fetchall()
 		if results:
@@ -157,7 +186,13 @@ def edit():
 			if request.form.get('birthdate'):
 				data = request.form.get('birthdate').split("-")
 				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
-			cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, notifications=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), notif, session['id']])
+			#let user update location removed notif cuz it be useless
+			if (request.form.get('latCord') and request.form.get('lngCord')):
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'), session['id']])
+				session['latCord'] = request.form.get('latCord')
+				session['lngCord'] = request.form.get('lngCord')
+			else:
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
@@ -288,7 +323,7 @@ def block_user(userId):
 		flash('User has been unblocked!', 'success')
 	else:
 		cur.execute("INSERT INTO blocked (userId, blockedId) VALUES (?, ?)", [session['id'], userId])
-		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=? AND user1 <> 1", [session['id'], userId])
 		# set system msg if blocked
 		con.commit()
 		con.close()
@@ -326,8 +361,8 @@ def like_user(userId):
 	user = cur.fetchone()
 	cur.execute("SELECT * FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
 	result = cur.fetchone()
-	if result:
-		cur.execute("DELETE FROM likes WHERE user1=? AND user2=?", [session['id'], userId])
+	if (result and userId != 1):
+		cur.execute("DELETE FROM likes WHERE user1=? AND user2=? AND user1 <> 1", [session['id'], userId])
 		flash('User has been unliked!', 'success')
 		# set system message if unliked
 		con.commit()
@@ -336,13 +371,13 @@ def like_user(userId):
 		sysmsg(data)
 	else:
 		cur.execute("INSERT INTO likes (user1, user2) VALUES (?, ?)", [session['id'], userId])
-		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=?", [session['id'], userId])
+		cur.execute("DELETE FROM blocked WHERE userId=? AND blockedId=? AND userId <> 1", [session['id'], userId])
 		con.commit()
-		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		cur.execute("SELECT * FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 		matched = cur.fetchall()
 		if len(matched) == 2:
 			cur.execute("INSERT INTO matches (user1, user2) VALUES (?, ?)", [session['id'], userId])
-			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+			cur.execute("DELETE FROM likes WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 			# set system message if matched
 			con.commit()
 			con.close()
@@ -370,7 +405,7 @@ def match_user(userId):
 	cur.execute("SELECT * FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
 	result = cur.fetchone()
 	if result:
-		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?)", [session['id'], userId, userId, session['id']])
+		cur.execute("DELETE FROM matches WHERE (user1=? AND user2=?) OR (user1=? AND user2=?) AND user1 <> 1", [session['id'], userId, userId, session['id']])
 		con.commit()
 		con.close()
 		data = {'id': userId, "message":session['username'] + " unmatched you"}
@@ -410,7 +445,12 @@ def likes(type):
 		cur.execute("SELECT * FROM users WHERE id IN (SELECT user2 FROM likes WHERE user1=?)", [session['id']])
 		likes = cur.fetchall()
 	elif type == 'matches':
-		cur.execute("SELECT * FROM users WHERE id IN (SELECT user1 FROM matches WHERE user1=? OR user2=?) AND NOT UPPER(username)=?", [session['id'], session['id'], 'SYSTEM'])
+		cur.execute("""SELECT * FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND NOT UPPER(users.username) = ?
+		UNION
+		SELECT * FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(users.username) = ?""", [session['id'], 'SYSTEM', session['id'], 'SYSTEM'])
+		likes = cur.fetchall()
+	elif type == 'views':
+		cur.execute("SELECT * FROM users WHERE id IN (SELECT viewedBy FROM views WHERE viewed=?) AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
 		likes = cur.fetchall()
 	con.close()
 	return render_template('likes.html', likes=likes, type=type.upper())

@@ -86,7 +86,7 @@
 						<option selected hidden value="G">Homosexual</option>
 						{% else %}
 						<option selected hidden value="B">Bisexual</option>
-						{% endif %} {% else %}
+						{% endif %}{% else %}
 						<option disabled selected hidden>Choose...</option>
 						{% endif %}
 						<option value="S">Heterosexual</option>
@@ -120,36 +120,78 @@
 {{ user.bio }}</textarea
 				>
 			</div>
-			<div class="form-check">
-				{% if user.notifications %}
-				<input
-					type="checkbox"
-					name="notifications"
-					id="notifications"
-					class="form-check-input"
-					checked
-				/>
-				{% else %}
-				<input
-					type="checkbox"
-					name="notifications"
-					class="form-check-input"
-					id="notifications"
-				/>
-				{% endif %}
-				<label for="notifications" class="form-check-label"
-					>Notifications?</label
-				>
+
+			<div class="form-group">
+				<label for="btnloc" class="form-control-label">Location:</label>
+				<div class="form-group">
+					<a
+						name="btnloc"
+						id="btnloc"
+						onclick="getlocation()"
+						class="btn btn-outline-primary"
+						>Detect Location</a
+					><br />
+				</div>
+				<div class="form-group">
+					<label for="latCord" class="form-control-label"
+						>latitude</label
+					>
+					{% if user.latCord %}
+					<input
+						type="number"
+						step="0.0001"
+						name="latCord"
+						id="latCord"
+						placeholder="latitude"
+						class="form-control rounded-0"
+						value="{{ user.latCord }}"
+						required
+					/>
+					{% else %}
+					<input
+						type="number"
+						step="0.0001"
+						name="latCord"
+						id="latCord"
+						placeholder="latitude"
+						class="form-control rounded-0"
+						required
+					/>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					<label for="lngCord" class="form-control-label"
+						>longitude</label
+					>
+					{% if user.lngCord %}
+					<input
+						type="number"
+						step="0.0001"
+						name="lngCord"
+						id="lngCord"
+						placeholder="longitude"
+						class="form-control rounded-0"
+						value="{{ user.lngCord }}"
+						required
+					/>
+					{% else %}
+					<input
+						type="number"
+						step="0.0001"
+						name="lngCord"
+						id="lngCord"
+						placeholder="longitude"
+						class="form-control rounded-0"
+						required
+					/>
+					{% endif %}
+				</div>
 			</div>
-			<div class="form-check">
-				<input
-					type="checkbox"
-					name="location"
-					id="location"
-					class="form-check-input"
-				/>
-				<label for="location" class="form-check-label">Location?</label>
-			</div>
+			<!-- Notifications toggle button -->
+			<a onclick="setpermission()" class="btn btn-outline-primary"
+				>Enable Notifications</a
+			>
 		</fieldset>
 		<div class="form-group d-flex justify-content-between">
 			<button type="submit" class="btn btn-outline-primary">
