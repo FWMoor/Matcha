@@ -110,12 +110,19 @@ function getlocation()
 				dataType: "json",
 				url:'http://nominatim.openstreetmap.org/reverse?format=json&lat='+ lat +'&lon=' + lng,
 				success : function(data) {
-					$('#city').val(data['address']['city'])
+					if (data['error'])
+					{
+						$('#city').val('Unknown')
+					}
+					else
+					{
+						$('#city').val(data['address']['city'])
+					}
 				}
 			})
 		},
 		(error) => {
-			console.log(error)
+			console.log("Couldn't use GPS")
 			ajaxreq()
 		});
 	} else {
