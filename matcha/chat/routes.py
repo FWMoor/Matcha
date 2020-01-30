@@ -69,6 +69,10 @@ def getMatches():
 		UNION
 		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(username)='SYSTEM'""", [id, id])
 		result = cur.fetchall()
+		for res in result:
+			cur.execute("SELECT * FROM messages WHERE matchId=? AND receiveId=? AND seen=?", [res['id'], session['id'], 0])
+			tot = cur.fetchall()
+			res['amount'] = len(tot)
 		con.close()
 	else:
 		return None
@@ -194,7 +198,7 @@ def message(data):
 			</div>
 			<br>""".format(session['username'], msg,date_time)
 			JSON = {"message": message, "rawmsg": msg, "roomname": session['room'], "sender": session['username']}
-			emit('update',JSON,room=session['room'], json=True)
+			emit('update', JSON, room=session['room'], json=True)
 
 def sysmsg(data):
 	date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
@@ -212,7 +216,7 @@ def sysmsg(data):
 		</div>
 		<br>""".format(session['username'], msg,date_time)
 		JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
-		emit('update',JSON,room=str(room), json=True, namespace = '/')
+		emit('update', JSON, room=str(room), json=True, namespace = '/')
 
 @socketio.on('update_msgcnt')
 @is_logged_in

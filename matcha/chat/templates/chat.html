@@ -27,7 +27,7 @@
 	<p>
 		<ul class="list-group">
 			{% for User in Matches %}
-				<li class="list-group-item list-group-item-light"><a href="#{{ User['id'] }}" onclick="SelectRoom({{ User['id']}}, '{{ User["username"] }}')" class="text-primary">{{ User["username"] }}</a></li>
+				<li class="list-group-item list-group-item-light"><a href="#{{ User['id'] }}" onclick="SelectRoom({{ User['id']}}, '{{ User["username"] }}')" class="text-primary">{{ User["username"] }}{% if User['amount'] > 0%} ({{ User['amount'] }}){% endif %}</a></li>
 			{% endfor %}
 		</ul>
 	</p>
