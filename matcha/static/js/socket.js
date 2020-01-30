@@ -12,8 +12,16 @@ window.setInterval(() =>
 		return
 	socket.emit('update_msgcnt',
 		cb = (data) => {
-			if (data > 0)
-				$('#msgcnt').text(data);
+				$('#sysmsgcnt').text(data[1])
+				$('#sysnotif').empty();
+				sysnotification = ''
+				data[0].forEach(message => {
+					sysnotification += message.message + '</br>'
+				});
+				$('#sysnotif').html(sysnotification)
+				$('#sysnotif').scrollTop($('#sysnotif')[0].scrollHeight);
+				$('#msgcnt').text(data[2]);
+				// Empty room
 				$('div.messages').empty();
 				if (url_raw.indexOf('#') > -1)
 				{

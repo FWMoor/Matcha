@@ -6,7 +6,7 @@ from datetime import datetime, date
 from matcha.auth.utils import hash_password, verify_password
 from matcha.decorators import not_logged_in, is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
-
+from matcha.chat.routes import getsystemmessages, getmessagecount
 from matcha.auth.email import send_email
 
 import string
@@ -120,7 +120,10 @@ def login():
 				session['lname'] = result['lname']
 				session['email'] = result['email']
 				session['id'] = result['id']
-				session['msgcnt'] = 0
+				session['sysnotif'] = getsystemmessages(result['id'])
+				session['sysmsgcnt'] = getmessagecount(result['id'], True)
+				session['msgcnt'] = getmessagecount(result['id'])
+
 				if (result['latCord'] and result['lngCord'] and result['city']):
 					session['latCord'] = result['latCord']
 					session['lngCord'] = result['lngCord']

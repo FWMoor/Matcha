@@ -203,3 +203,8 @@ a.article-title:hover {
 	font-size: 0.8rem;
 	padding-top: 1rem;
 }
+
+.dropdown-menu {
+	height: 10vh;
+	overflow-y: auto;
+}
