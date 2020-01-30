@@ -18,6 +18,15 @@ def sessions():
 	except:
 		abort(500)
 
+# Notifications
+@chat.route('/notifications/')
+@is_logged_in
+def notifications():
+	try:
+		return render_template('chat.html', Matches=getSystem(), title="Notifications")
+	except:
+		abort(500)
+
 def escape(s, quote=True):
 	s = s.replace("&", "&amp;") # Must be done first!
 	s = s.replace("<", "&lt;")
@@ -42,9 +51,25 @@ def getMatches():
 	cur = con.cursor()
 	if session.get('id') is not None:
 		id = session['id']
-		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ?
+		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND NOT UPPER(username)='SYSTEM'
 		UNION
-		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ?""", [id, id])
+		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(username)='SYSTEM'""", [id, id])
+		result = cur.fetchall()
+		con.close()
+	else:
+		return None
+	return result
+
+
+def getSystem():
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	if session.get('id') is not None:
+		id = session['id']
+		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND UPPER(username)='SYSTEM'
+		UNION
+		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND UPPER(username)='SYSTEM'""", [id, id])
 		result = cur.fetchall()
 		con.close()
 	else:
