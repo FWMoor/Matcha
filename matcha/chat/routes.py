@@ -143,7 +143,7 @@ def getHistory(data):
 			<p>{}</p>
 			<span class="time-right {} ">{}</span>
 		</div>
-		<br>""".format(css, user, message['message'], css,message['time'])
+		<br>""".format(css, user, message['message'], status, message['time'])
 	emit('load', strmessages)
 
 @socketio.on('connect')

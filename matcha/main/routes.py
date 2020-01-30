@@ -80,7 +80,6 @@ def getdist(lat, lng):
 def feed():
 	maxdist = 2147483647
 	mindist = 0
-	users = []
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
@@ -96,24 +95,14 @@ def feed():
 	else:
 		return render_template('feed.html', setup="Please complete your profile get your match",form=request.form)
 
-	# get Suggested users
-	if request.method == 'GET':
-		cur.execute('SELECT * FROM users WHERE NOT id=? AND NOT id=1 AND complete=1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
-		tmp = cur.fetchall()
-
 	# custom search
-	elif request.method == 'POST':
+	if request.method == 'POST':
 		# pagination
 		if (request.form['submit'] == 'Search'):
 			session['page'] = 1
-		elif (request.form['submit'] == 'Next'):
-			session['page'] += 1
-		elif (request.form['submit'] == "Previous"):
-			if (session['page'] > 1):
-				session['page'] -= 1
 
 		data = []
-		SQL = 'SELECT * FROM users WHERE NOT id=? AND NOT id = 1 AND complete=1'
+		SQL = 'SELECT * FROM users WHERE NOT id=? AND NOT id = 1'
 		data.append(session['id'])
 		
 		#gender
@@ -147,7 +136,7 @@ def feed():
 		if request.form['city']:
 			SQL += ' AND city = ? '
 			data.append(request.form['city'])
-		
+
 		# SQL += ' AND complete=1'
 		if request.form['Order']:
 			if request.form['Order'] == "Username":
@@ -158,17 +147,12 @@ def feed():
 				SQL += ' ORDER BY fame ASC'
 			elif request.form['Order'] != 'Distance':
 				print(request.form['Order'] + ' Cant be sorted by !')
-
-		SQL += ' LIMIT ?, ?'
-		data.append(((session['page'] - 1) * AMOUNT_PER_PAGE ))
-		data.append(AMOUNT_PER_PAGE)
-
-		print( '\n\n\n\n\n\n\n\n\n\n' + SQL)
-
+	
 		cur.execute(SQL, data)
 		tmp = cur.fetchall()
-
-		con.close()
+		temp = []
+		users = []
+		# no pagination
 
 		if request.form['MaxDist']:
 			maxdist = float(request.form['MaxDist'])
@@ -176,15 +160,37 @@ def feed():
 		if request.form['MinDist']:
 			mindist = float(request.form['MinDist'])
 
-	for user in tmp:
-		if user['latCord'] and user['lngCord']:
+		for user in tmp:
 			user['distance'] = getdist(user['latCord'], user['lngCord'])
 			if user['distance'] <= maxdist and user['distance'] >= mindist:
-				users.append(user)
-
-		# sort by distance
+				temp.append(user)
+			# sort by distance
 		if (request.method == 'POST' and request.form['Order'] == 'Distance'):
-			users = sorted(users, key=lambda k: user['distance'])
+			temp = sorted(temp, key=lambda user: user['distance'])
+		
+		#for bug that fred showed add stop
+		start = (session['page'] - 1) * AMOUNT_PER_PAGE
+		stop = start + AMOUNT_PER_PAGE
+		if (request.form['submit'] == 'Next'):
+			if (len(temp) >= stop):
+				session['page'] += 1
+
+		if (request.form['submit'] == "Previous"):
+			if (session['page'] > 1):
+				session['page'] -= 1
+		# for update
+		start = (session['page'] - 1) * AMOUNT_PER_PAGE
+		stop = start + AMOUNT_PER_PAGE
+		users = (temp[start:stop])
+		con.close()
+
+
+	# get Suggested users
+	if request.method == 'GET':
+		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
+		users = cur.fetchall()
+		con.close()
+
 	try:
 		return render_template('feed.html', users=users, form=request.form)
 	except TemplateNotFound:
