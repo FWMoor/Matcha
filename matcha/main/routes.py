@@ -187,8 +187,10 @@ def feed():
 
 	# get Suggested users
 	if request.method == 'GET':
-		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 ORDER BY fame DESC LIMIT 0, 10', [session['id']])
+		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 AND gender=? AND sexuality=? ORDER BY fame DESC LIMIT 0, 10', [session['id'], wanted_sexuality, user['sexuality']])
 		users = cur.fetchall()
+		for user in users:
+			user['distance'] = getdist(user['latCord'], user['lngCord'])
 		con.close()
 
 	try:
