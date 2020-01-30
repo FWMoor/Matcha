@@ -36,14 +36,28 @@ def escape(s, quote=True):
 		s = s.replace('\'', "&#x27;")
 	return s
 
-def getmessagecount(id):
+def getmessagecount(id, system = False):
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
-	cur.execute("SELECT COUNT(id) as count FROM messages WHERE receiveId=? AND seen = 0", [id])
+	SQL = "SELECT COUNT(id) as count FROM messages WHERE receiveId=? AND seen = 0 "
+	if (not system):
+		SQL += "AND senderId <> 1"
+	else:
+		SQL += "AND senderId = 1"
+	cur.execute(SQL, [id])
 	result = cur.fetchone()
 	con.close()
 	return result['count']
+
+def getsystemmessages(id):
+	con = db_connect()
+	con.row_factory = dict_factory
+	cur = con.cursor()
+	cur.execute("SELECT message FROM messages WHERE senderId = 1 AND receiveId = ?", [id])
+	result = cur.fetchall()
+	con.close()
+	return result
 
 def getMatches():
 	con = db_connect()
@@ -54,22 +68,6 @@ def getMatches():
 		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND NOT UPPER(username)='SYSTEM'
 		UNION
 		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(username)='SYSTEM'""", [id, id])
-		result = cur.fetchall()
-		con.close()
-	else:
-		return None
-	return result
-
-
-def getSystem():
-	con = db_connect()
-	con.row_factory = dict_factory
-	cur = con.cursor()
-	if session.get('id') is not None:
-		id = session['id']
-		cur.execute("""SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user1 = users.id) Where matches.user2 = ? AND UPPER(username)='SYSTEM'
-		UNION
-		SELECT users.username, matches.id, users.id as userid FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND UPPER(username)='SYSTEM'""", [id, id])
 		result = cur.fetchall()
 		con.close()
 	else:
@@ -174,7 +172,7 @@ def getHistory(data):
 @socketio.on('connect')
 def connect_all():
 	if (not session.get('room')):
-		session['room'] = None
+		session['room'] = 'System'
 	Matches=getMatches()
 	if Matches is not None:
 		for match in Matches:
@@ -219,6 +217,16 @@ def sysmsg(data):
 @socketio.on('update_msgcnt')
 @is_logged_in
 def updatemessagecount():
-	count = getmessagecount(session['id'])
-	session['msgcnt'] = count
-	return count
+	session['sysnotif'] = getsystemmessages(session['id'])
+	session['sysmsgcnt'] = getmessagecount(session['id'], True)
+	session['msgcnt'] = getmessagecount(session['id'])
+	return [session['sysnotif'], session['sysmsgcnt'], session['msgcnt']]
+
+@socketio.on('update_system_seen')
+def update_system_seen():
+	con = db_connect()
+	cur = con.cursor()
+	cur.execute(""" UPDATE messages SET seen = 1 WHERE receiveId = ? AND senderId = 1 """, [session['id']])
+	con.commit()
+	con.close()
+	return 0
