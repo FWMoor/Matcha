@@ -191,7 +191,7 @@ def message(data):
 		if not msg.isspace():
 			insertMessage([session['room'], session['id'], receiveId, msg, date_time])
 			message = """
-			<div class="message content-section">
+			<div class="message content-section send">
 				<h5>@{}</h5>
 				<p>{}</p>
 				<span class="time-right">{}</span>
