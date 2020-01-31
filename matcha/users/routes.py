@@ -23,7 +23,6 @@ def get_age(birthDate):
 
 def update_fame_rating(id):
 	total = getprofileviews(id)
-	print(total)
 	con = db_connect()
 	cur = con.cursor()
 	cur.execute("SELECT * FROM likes WHERE user2=?", [id])
@@ -435,9 +434,9 @@ def pick_tag(tagId):
 	con.close()
 	return redirect(url_for('users.tags'))
 
-@users.route('/profile/likes/<type>')
+@users.route('/profile/activity/<type>')
 @is_logged_in
-def likes(type):
+def activity(type):
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
@@ -453,5 +452,11 @@ def likes(type):
 	elif type == 'views':
 		cur.execute("SELECT * FROM users WHERE id IN (SELECT viewedBy FROM views WHERE viewed=?) AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
 		likes = cur.fetchall()
+	elif type == 'likedBy':
+		cur.execute("SELECT * FROM users WHERE id IN (SELECT user1 FROM likes WHERE user2=?)", [session['id']])
+		likes = cur.fetchall()
+	elif type == 'blocked':
+		cur.execute("SELECT * FROM users WHERE id IN (SELECT blockedId FROM blocked WHERE userId=?)", [session['id']])
+		likes = cur.fetchall()
 	con.close()
-	return render_template('likes.html', likes=likes, type=type.upper())
+	return render_template('activity.html', likes=likes, type=type.upper())

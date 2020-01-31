@@ -1,0 +1,114 @@
+{% extends 'layout.html' %} {% block content %}
+<h2 class="text-center">Activity</h2>
+<div class="tabs">
+	{% if type == 'LIKES' %}
+	<a
+		href="{{ url_for('users.activity', type='likes') }}"
+		class="bg-primary current-tab"
+		>Likes</a
+	>
+	{% else %}
+	<a href="{{ url_for('users.activity', type='likes') }}" class="bg-primary"
+		>Likes</a
+	>
+	{% endif %}
+	{% if type == 'LIKEDBY' %}
+	<a
+		href="{{ url_for('users.activity', type='likedBy') }}"
+		class="bg-primary current-tab"
+		>Liked By</a
+	>
+	{% else %}
+	<a href="{{ url_for('users.activity', type='likedBy') }}" class="bg-primary"
+		>Liked By</a
+	>
+	{% endif %} {% if type == 'MATCHES' %}
+	<a
+		href="{{ url_for('users.activity', type='matches') }}"
+		class="bg-primary current-tab"
+		>Matches</a
+	>
+	{% else %}
+	<a href="{{ url_for('users.activity', type='matches') }}" class="bg-primary"
+		>Matches</a
+	>
+	{% endif %} {% if type == 'VIEWS' %}
+	<a
+		href="{{ url_for('users.activity', type='views') }}"
+		class="bg-primary current-tab"
+		>Views</a
+	>
+	{% else %}
+	<a href="{{ url_for('users.activity', type='views') }}" class="bg-primary"
+		>Views</a
+	>
+	{% endif %}
+	{% if type == 'BLOCKED' %}
+	<a
+		href="{{ url_for('users.activity', type='blocked') }}"
+		class="bg-primary current-tab"
+		>Blocked</a
+	>
+	{% else %}
+	<a href="{{ url_for('users.activity', type='blocked') }}" class="bg-primary"
+		>Blocked</a
+	>
+	{% endif %}
+</div>
+<table class="table table-striped table-hover">
+	<thead class="thead-dark">
+		<tr >
+			{% if type == 'LIKES' %}
+			<th scope="col">Like</th scope="col">
+			<th scope="col" class="text-right">Unlike</th>
+			{% elif type == 'LIKEDBY' %}
+			<th scope="col">Liked By</th scope="col">
+			{% elif type == 'MATCHES' %}
+			<th scope="col">Matched With</th scope="col">
+			<th scope="col" class="text-right">Unmatch</th>
+			{% elif type == 'VIEWS' %}
+			<th scope="col">Viewed By</th scope="col">
+			{% elif type == 'BLOCKED' %}
+			<th scope="col">Blocked</th scope="col">
+			<th scope="col" class="text-right">Unblock</th>
+			{% endif %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for like in likes %}
+		<tr >
+			<td>
+				<a href="{{ url_for('users.profile', username=like.username) }}"
+					>{{ like.username }}</a
+				>
+			</td>
+			{% if type == 'LIKES' %}
+			<td>
+				<a
+					href="{{ url_for('users.like_user', userId=like.id) }}"
+					class="text-danger float-right"
+					>Unlike</a
+				>
+			</td>
+			{% elif type == 'MATCHES' %}
+			<td>
+				<a
+					href="{{ url_for('users.match_user', userId=like.id) }}"
+					class="text-danger float-right"
+					>Unmatch</a
+				>
+			</td>
+			{% elif type == 'BLOCKED' %}
+			<td>
+				<a
+					href="{{ url_for('users.block_user', userId=like.id) }}"
+					class="text-danger float-right"
+					>Unblock</a
+				>
+			</td>
+			{% endif %}
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

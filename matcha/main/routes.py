@@ -86,14 +86,17 @@ def feed():
 	cur.execute("SELECT * FROM users WHERE id=?", [session['id']])
 	user = cur.fetchone()
 	#get the current user :)
-	if user['gender'] and (user['gender'] == 'M' or user['gender'] == 'F'):
+	if user['complete'] == 1:
 		if user['sexuality'] == 'S' or user['sexuality'] == 'G':
 			if user['sexuality'] == 'S':
 				wanted_sexuality = 'M' if user['gender'] == 'F' else 'F'
 			else:
 				wanted_sexuality = 'M' if user['gender'] == 'M' else 'F'
+		else:
+			wanted_sexuality = 'A'
 	else:
-		return render_template('feed.html', setup="Please complete your profile get your match",form=request.form)
+		flash("Please complete your profile to view the feed!", "danger")
+		return render_template('feed.html', setup="Profile is not complete",form=request.form)
 
 	# custom search
 	if request.method == 'POST':
@@ -106,9 +109,10 @@ def feed():
 		data.append(session['id'])
 		
 		#gender
-		SQL += ' AND gender=? AND sexuality=?'
-		data.append(wanted_sexuality)
-		data.append(user['sexuality'])
+		if not wanted_sexuality == 'A':
+			SQL += ' AND gender=? AND sexuality=?'
+			data.append(wanted_sexuality)
+			data.append(user['sexuality'])
 
 		if request.form['MinAge']:
 			SQL += " AND age >= ?"
@@ -137,7 +141,7 @@ def feed():
 			SQL += ' AND city = ? '
 			data.append(request.form['city'])
 
-		# SQL += ' AND complete=1'
+		SQL += ' AND complete=1'
 		if request.form['Order']:
 			if request.form['Order'] == "Username":
 				SQL += ' ORDER BY username ASC'
@@ -150,6 +154,9 @@ def feed():
 	
 		cur.execute(SQL, data)
 		tmp = cur.fetchall()
+		if not tmp:
+			flash("No users were found!", "danger")
+			return render_template('feed.html', form=request.form)
 		temp = []
 		users = []
 		# no pagination
@@ -187,11 +194,14 @@ def feed():
 
 	# get Suggested users
 	if request.method == 'GET':
-		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 AND gender=? AND sexuality=? ORDER BY fame DESC LIMIT 0, 10', [session['id'], wanted_sexuality, user['sexuality']])
+		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 AND gender=? AND sexuality=? AND complete = 1 ORDER BY fame DESC LIMIT 0, 10', [session['id'], wanted_sexuality, user['sexuality']])
 		users = cur.fetchall()
-		for user in users:
-			user['distance'] = getdist(user['latCord'], user['lngCord'])
 		con.close()
+		if users:
+			for user in users:
+				user['distance'] = getdist(user['latCord'], user['lngCord'])
+		else:
+			flash("No users were found!", "danger")
 
 	try:
 		return render_template('feed.html', users=users, form=request.form)

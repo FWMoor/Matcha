@@ -208,3 +208,26 @@ a.article-title:hover {
 	height: 10vh;
 	overflow-y: auto;
 }
+
+.tabs {
+	margin: 20px auto;
+	text-align: center;
+	display: flex;
+	justify-content: space-around;
+}
+
+.tabs a {
+	text-decoration: none;
+	padding: 15px 0;
+	color: white;
+	width: 28%;
+}
+
+.current-tab {
+	background-color: #1a252f !important;
+	opacity: 0.8;
+}
+
+.tabs > a:hover {
+	opacity: 0.8;
+}
