@@ -7,4 +7,4 @@ class Config:
 	MAIL_PORT = 465
 	MAIL_USE_SSL = True
 	MAIL_USERNAME = 'projectmatcha60@gmail.com'
-	MAIL_PASSWORD = ''
+	MAIL_PASSWORD = 'matcha123'
