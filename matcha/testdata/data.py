@@ -132,7 +132,7 @@ def randbirthday(now):
 def add_users(cur, useramount):
 	# RECORD 1 ALWAYS SYSTEM
 	gender_arr = ['M', 'F']
-	sexuality_arr = ['S', 'G', 'O']
+	sexuality_arr = ['S', 'G', 'B']
 	cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', 
 		['System', 'System', 'system', 'System@mailcatch.com', '70d6d3db2b8cee727994e89f9b8c21622e39840ad579dd82da37aadd441473aab9996dd749d652b8023791f3862ca3cc584f9ff9c27222217e77af241d3b3abd54486eeb78c733c57aab7aa7ff5709ec90655dee193c4a32e46ffb2796049d0b', None])
 	i = 2;	
