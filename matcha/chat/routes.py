@@ -18,14 +18,6 @@ def sessions():
 	except:
 		abort(500)
 
-# Notifications
-@chat.route('/notifications/')
-@is_logged_in
-def notifications():
-	try:
-		return render_template('chat.html', Matches=getSystem(), title="Notifications")
-	except:
-		abort(500)
 
 def escape(s, quote=True):
 	s = s.replace("&", "&amp;") # Must be done first!
@@ -200,9 +192,10 @@ def message(data):
 			JSON = {"message": message, "rawmsg": msg, "roomname": session['room'], "sender": session['username']}
 			emit('update', JSON, room=session['room'], json=True)
 
+@is_logged_in
 def sysmsg(data):
 	date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-	username = getusernamebyid(data['id'])
+	# username = getusernamebyid(data['id'])
 	msg = escape(data['message'])
 	room = getroombyuserids(1, data['id'])['id']
 	# print(room)
@@ -227,6 +220,7 @@ def updatemessagecount():
 	return [session['sysnotif'], session['sysmsgcnt'], session['msgcnt']]
 
 @socketio.on('update_system_seen')
+@is_logged_in
 def update_system_seen():
 	con = db_connect()
 	cur = con.cursor()

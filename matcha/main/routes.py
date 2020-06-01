@@ -113,6 +113,11 @@ def feed():
 			SQL += ' AND gender=? AND sexuality=?'
 			data.append(wanted_sexuality)
 			data.append(user['sexuality'])
+		else:
+			if (user['gender'] == 'M'):
+				SQL += " AND ((sexuality = 'B') or (sexuality = 'G' AND gender = 'M') or (sexuality = 'S' AND gender = 'F'))"
+			else:
+				SQL += " AND ((sexuality = 'B') or (sexuality = 'G' AND gender = 'F') or (sexuality = 'S' AND gender = 'M'))"
 
 		if request.form['MinAge']:
 			SQL += " AND age >= ?"
@@ -194,7 +199,16 @@ def feed():
 
 	# get Suggested users
 	if request.method == 'GET':
-		cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 AND gender=? AND sexuality=? AND complete = 1 ORDER BY fame DESC LIMIT 0, 10', [session['id'], wanted_sexuality, user['sexuality']])
+		if (wanted_sexuality == 'A'):
+			qstr = "SELECT * FROM users WHERE"
+			if (user['gender'] == 'M'):
+				qstr += " ((sexuality = 'B') or (sexuality = 'G' AND gender = 'M') or (sexuality = 'S' AND gender = 'F'))"
+			else:
+				qstr += " ((sexuality = 'B') or (sexuality = 'G' AND gender = 'F') or (sexuality = 'S' AND gender = 'M'))"
+			qstr += " AND NOT id =? AND NOT id = 1 AND complete = 1 ORDER BY fame DESC LIMIT 0, 10"
+			cur.execute(qstr, [session['id']])
+		else:
+			cur.execute('SELECT * FROM users WHERE NOT id =? AND NOT id = 1 AND gender=? AND sexuality=? AND complete = 1 ORDER BY fame  DESC, totalviews DESC LIMIT 0, 10', [session['id'], wanted_sexuality, user['sexuality']])
 		users = cur.fetchall()
 		con.close()
 		if users:

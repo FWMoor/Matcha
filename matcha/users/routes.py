@@ -149,7 +149,7 @@ def profile(username):
 				liked = 1 if like != None else 0
 		con.close()
 		#update profile views
-		referrer = request.referrer
+		# referrer = request.referrer
 		if (username != session['username']):
 			data = {'id': result['id'], "message":session['username'] + " viewed your profile"}
 			sysmsg(data)
@@ -185,7 +185,16 @@ def edit():
 			if request.form.get('birthdate'):
 				data = request.form.get('birthdate').split("-")
 				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
+				if (not age or age < 18):
+					flash('You are not allowed to use this site if you are under 18!', 'danger')
+					return redirect(url_for('users.edit'))
+			else: 
+				flash('Please Spesify your Date of birth!', 'danger')
+				return redirect(url_for('users.edit'))
 			#let user update location removed notif cuz it be useless
+			if (not request.form.get('gender')):
+				flash('Please Spesify your Gender!', 'danger')
+				return redirect(url_for('users.edit'))
 			if (request.form.get('latCord') and request.form.get('lngCord') and request.form.get('city')):
 				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=?, city=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'),request.form.get('city'), session['id']])
 				session['latCord'] = request.form.get('latCord')
@@ -276,7 +285,10 @@ def delete_pic(photoId):
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
-		os.remove('matcha/static/photos/' + result['path'])
+		try:
+			os.remove('matcha/static/photos/' + result['path'])
+		except FileNotFoundError:
+			flash('Picture has been deleted!', 'danger')
 		if result['profile'] == 1:
 			cur.execute("UPDATE users SET path=? WHERE id=?", [None, session['id']])
 		cur.execute("DELETE FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
