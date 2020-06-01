@@ -133,61 +133,18 @@
 						>Detect Location</a
 					><br />
 				</div>
-				<div class="form-group">
-					<label for="latCord" class="form-control-label"
-						>latitude</label
-					>
-					{% if user.latCord %}
-					<input
-						type="number"
-						step="0.000001"
-						name="latCord"
-						id="latCord"
-						placeholder="latitude"
-						class="form-control rounded-0"
-						value="{{ user.latCord }}"
-						required
-					/>
-					{% else %}
-					<input
-						type="number"
-						step="0.000001"
-						name="latCord"
-						id="latCord"
-						placeholder="latitude"
-						class="form-control rounded-0"
-						required
-					/>
-					{% endif %}
-				</div>
+				<!-- PLACE HOLDERS -->
+			<div class="form-group">
+				{% if user.latCord %}
+					<input type="hidden" name="latCord" value="{{ user.latCord }}"/>
+				{% endif %}
+			</div>
+			<div class="form-group">
+				{% if user.lngCord %}
+					<input type="hidden" name="lngCord" value="{{ user.lngCord }}" />
+				{% endif %}
+			</div>
 
-				<div class="form-group">
-					<label for="lngCord" class="form-control-label"
-						>longitude</label
-					>
-					{% if user.lngCord %}
-					<input
-						type="number"
-						step="0.000001"
-						name="lngCord"
-						id="lngCord"
-						placeholder="longitude"
-						class="form-control rounded-0"
-						value="{{ user.lngCord }}"
-						required
-					/>
-					{% else %}
-					<input
-						type="number"
-						step="0.000001"
-						name="lngCord"
-						id="lngCord"
-						placeholder="longitude"
-						class="form-control rounded-0"
-						required
-					/>
-					{% endif %}
-				</div>
 				<div class="form-group">
 					<label for="city" class="form-control-label">City</label>
 					{% if user.city %}

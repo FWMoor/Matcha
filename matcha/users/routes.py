@@ -195,6 +195,7 @@ def edit():
 			if (not request.form.get('gender')):
 				flash('Please Spesify your Gender!', 'danger')
 				return redirect(url_for('users.edit'))
+				
 			if (request.form.get('latCord') and request.form.get('lngCord') and request.form.get('city')):
 				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=?, city=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'),request.form.get('city'), session['id']])
 				session['latCord'] = request.form.get('latCord')
