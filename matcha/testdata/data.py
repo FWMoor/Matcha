@@ -17,7 +17,7 @@ from threading import Thread
 import datetime
 
 users =[]
-
+HCODE = 500
 input_file = open("users.json")
 json_array = json.load(input_file)
 jsonlen = len(json_array)
@@ -135,14 +135,13 @@ def add_users(cur, useramount):
 	sexuality_arr = ['S', 'G', 'B']
 	cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', 
 		['System', 'System', 'system', 'System@mailcatch.com', '70d6d3db2b8cee727994e89f9b8c21622e39840ad579dd82da37aadd441473aab9996dd749d652b8023791f3862ca3cc584f9ff9c27222217e77af241d3b3abd54486eeb78c733c57aab7aa7ff5709ec90655dee193c4a32e46ffb2796049d0b', None])
-	i = 2;	
+	i = 2
 	now = datetime.datetime.now()
 	for user in json_array:
 		max = len(json_array)
 		if useramount < max:
 			max = useramount
 		if i <= (useramount) and i <= max:
-			num = randrange(999)
 			user['email'] = user['username'] + '@mailcatch.com'
 			user['bio'] = "blah blah blah blah blah blah blah blah blah blah blah"
 			user['gender'] = gender_arr[randrange(len(gender_arr))]
@@ -150,7 +149,7 @@ def add_users(cur, useramount):
 			user['birthdate'], user['age'] = randbirthday(now)
 			user['totalviews'] = randrange(300)
 			printProgressBar(i, max, msgcomplete = "Users Added Succesfully!")
-			active, user['path'] = images(i, cur);
+			active, user['path'] = images(i, cur)
 			cur.execute('INSERT INTO matches (user1,user2) VALUES (1, ?)', [i])
 			cur.execute('INSERT INTO users (path, fname, lname, username, email, verify, bio, gender, sexuality, age, latCord, lngCord, city, complete, birthdate, totalviews, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
 			[user['path'], user['name'], user['surname'], user['username'], user['email'], None, user['bio'], user['gender'], user['sexuality'], user['age'], user['latCord'], user['lngCord'], user['city'], active, user['birthdate'], user['totalviews'], '70d6d3db2b8cee727994e89f9b8c21622e39840ad579dd82da37aadd441473aab9996dd749d652b8023791f3862ca3cc584f9ff9c27222217e77af241d3b3abd54486eeb78c733c57aab7aa7ff5709ec90655dee193c4a32e46ffb2796049d0b'])
@@ -224,11 +223,11 @@ def main():
 
 	if dopart == "1":
 		# print(dopart)
-		value = input("Amount of records to generate (MAX =" + str(jsonlen) + ") \n>")
+		value = input("Amount of records to generate (MAX =" + str(HCODE) + ") \n>")
 		val, success = intTryParse(value)
 		if (success):
-			if (val > jsonlen or val < 2):
-				print("invalid amount, needs to have between 2 and " + str(jsonlen))
+			if (val > HCODE or val < 2):
+				print("invalid amount, needs to have between 2 and " + str(HCODE))
 				return
 			fakedata(val)
 		else:
