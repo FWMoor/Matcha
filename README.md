@@ -22,7 +22,7 @@ Matcha is a dating site that allows people to meet based on their sexual prefere
 6. Install dependencies
     `pip install -r requirements.txt`
 7. Set Enviroment Variables
-    open config file edit MAIL_USERNAME, MAIL_PASSWORD, SECRET_PASSWORD
+    open config file edit MAIL_USERNAME, MAIL_PASSWORD, SECRET_PASSWORD and remove the 	export code lines.
 8. Run The application
     `python app.py`
 

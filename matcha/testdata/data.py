@@ -18,7 +18,7 @@ import datetime
 
 users =[]
 HCODE = 500
-input_file = open("users.json", encoding='UTF-8')
+input_file = open("users.json", encoding="utf-8")
 json_array = json.load(input_file)
 jsonlen = len(json_array)
 store_list = []
