@@ -7,6 +7,6 @@ def send_email(to, subject, template):
 		subject,
 		recipients=[to],
 		html=template,
-		sender= os.environ.get('MAIL_USERNAME')
+		sender="projectmatcha60@gmail.com"
 	)
 	mail.send(msg)

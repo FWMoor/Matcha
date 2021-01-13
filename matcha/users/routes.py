@@ -8,6 +8,7 @@ import os
 #For sys notifications
 from matcha.chat.routes import sysmsg
 
+from matcha.utils.general import get_age
 from matcha.auth.utils import hash_password
 from matcha.decorators import is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
@@ -16,10 +17,6 @@ ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
 
 users = Blueprint('users', __name__,
 				  template_folder='./templates', static_folder='../static')
-def get_age(birthDate):
-	today = date.today()
-	age = today.year - birthDate.year - ((today.month, today.day) < (birthDate.month, birthDate.day))
-	return age
 
 def update_fame_rating(id):
 	total = getprofileviews(id)
@@ -65,7 +62,7 @@ def getprofileviews(id):
 	con = db_connect()
 	con.row_factory = dict_factory
 	cur = con.cursor()
-	cur.execute("SELECT viewedBy as count FROM views WHERE viewed=? AND NOT viewed=1", [id])
+	cur.execute("SELECT viewee as count FROM views WHERE viewer=? AND NOT viewer=1", [id])
 	result = cur.fetchall()
 	con.close()
 	return len(result)
@@ -100,7 +97,7 @@ def profile(username):
 			if isblocked:
 				abort(404)
 			else:
-				cur.execute("SELECT * FROM views WHERE viewed=? AND viewedBy=?", [result['id'], session['id']])
+				cur.execute("SELECT * FROM views WHERE viewee=? AND viewer=?", [result['id'], session['id']])
 				view = cur.fetchone()
 				if not view:
 					cur.execute("INSERT INTO views VALUES (?, ?)", [result['id'], session['id']])
@@ -114,20 +111,18 @@ def profile(username):
 					cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
 					pics = cur.fetchall()
 					if not pics:
-						cur.execute("UPDATE users SET path=? WHERE id=?", [picture_file, session['id']])
 						cur.execute("INSERT INTO photos (userId, path, profile) VALUES (?, ?, 1)", [session['id'], picture_file])
 					else:
 						cur.execute("INSERT INTO photos (userId, path) VALUES (?, ?)", [session['id'], picture_file])
 					con.commit()
-		cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
+		cur.execute("SELECT * FROM photos WHERE userId=? ORDER BY profile DESC", [result['id']])
 		pics = cur.fetchall()
-		cur.execute("SELECT * FROM photos WHERE userId=? AND profile=1", [result['id']])
-		profile = cur.fetchone()
+		profile = pics[0] if pics != [] else None
 		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [result['id']])
 		tags = cur.fetchall()
 		cur.execute("SELECT * FROM users WHERE id=?", [session['id']])
 		complete = cur.fetchone()
-		if complete['fname'] and complete['lname'] and complete['username'] and complete['email'] and complete['gender'] and complete['age'] and complete['sexuality'] and complete['bio'] and complete['path']:
+		if complete['fname'] and complete['lname'] and complete['username'] and complete['email'] and complete['gender'] and complete['birthdate'] and complete['sexuality'] and complete['bio'] and complete['ProfilePictureID']:
 			cur.execute("UPDATE users SET complete=? WHERE id=?", [1, complete['id']])
 		else:
 			cur.execute("UPDATE users SET complete=? WHERE id=?", [0, complete['id']])
@@ -159,8 +154,9 @@ def profile(username):
 		try:
 			if result['password']:
 				del result['password']
-			if result['age']:
-				age = result['age']
+			if result['birthdate']:
+				data = result['birthdate'].split("-")
+				age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
 			else:
 				age = 0
 			return render_template('profile.html', user=result, fame=update_fame_rating(result['id']), profile=image_file, pics=pics, amount=len(pics), blocked=blocked, liked=liked, matched=matched, age=age, tags=tags)
@@ -197,12 +193,12 @@ def edit():
 				return redirect(url_for('users.edit'))
 				
 			if (request.form.get('latCord') and request.form.get('lngCord') and request.form.get('city')):
-				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=?, city=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'),request.form.get('city'), session['id']])
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, sexuality=?, birthdate=?, bio=?, latCord=?, lngCord=?, city=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), request.form.get('latCord'), request.form.get('lngCord'),request.form.get('city'), session['id']])
 				session['latCord'] = request.form.get('latCord')
 				session['lngCord'] = request.form.get('lngCord')
 				session['city'] = request.form.get('city')
 			else:
-				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, age=?, sexuality=?, birthdate=?, bio=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), age, request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), session['id']])
+				cur.execute("UPDATE users SET fname=?, lname=?, username=?, email=?, gender=?, sexuality=?, birthdate=?, bio=? WHERE id=?", [request.form.get('fname'), request.form.get('lname'), request.form.get('username'), request.form.get('email'), request.form.get('gender'), request.form.get('sexuality'), request.form.get('birthdate'), request.form.get('bio'), session['id']])
 			con.commit()
 			con.close()
 			session['username'] = request.form.get('username')
@@ -290,8 +286,6 @@ def delete_pic(photoId):
 			os.remove('matcha/static/photos/' + result['path'])
 		except FileNotFoundError:
 			flash('Picture has been deleted!', 'danger')
-		if result['profile'] == 1:
-			cur.execute("UPDATE users SET path=? WHERE id=?", [None, session['id']])
 		cur.execute("DELETE FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 		con.commit()
 	else:
@@ -308,7 +302,7 @@ def set_pic(photoId):
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
-		cur.execute("UPDATE users SET path=? WHERE id=?", [result['path'], session['id']])
+		cur.execute("UPDATE users SET ProfilePictureID=? WHERE id=?", [result['path'], session['id']])
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND profile=?", [0, session['id'], 1])
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND id=?", [1, session['id'], photoId])
 		con.commit()
@@ -463,7 +457,7 @@ def activity(type):
 		SELECT * FROM matches LEFT OUTER JOIN users on (matches.user2 = users.id) Where matches.user1 = ? AND NOT UPPER(users.username) = ?""", [session['id'], 'SYSTEM', session['id'], 'SYSTEM'])
 		likes = cur.fetchall()
 	elif type == 'views':
-		cur.execute("SELECT * FROM users WHERE id IN (SELECT viewedBy FROM views WHERE viewed=?) AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
+		cur.execute("SELECT * FROM users WHERE id IN (SELECT viewer FROM views WHERE viewee=?) AND NOT UPPER(username)=?", [session['id'], 'SYSTEM'])
 		likes = cur.fetchall()
 	elif type == 'likedBy':
 		cur.execute("SELECT * FROM users WHERE id IN (SELECT user1 FROM likes WHERE user2=?)", [session['id']])
