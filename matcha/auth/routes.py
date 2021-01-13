@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, request, flash, redirect, session, abort
+from flask import Blueprint, render_template, url_for, request, flash, redirect, session, abort, escape
 import re
 from jinja2 import TemplateNotFound
 from datetime import datetime, date
@@ -8,6 +8,7 @@ from matcha.decorators import not_logged_in, is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
 from matcha.chat.routes import getsystemmessages, getmessagecount
 from matcha.auth.email import send_email
+from matcha.auth.validation import validateRegistration, validatePasswords
 
 import string
 import secrets
@@ -24,73 +25,35 @@ def get_age(birthDate):
 @not_logged_in
 def register():
 	if request.method == 'POST':
-		error = 0
-		con = db_connect()
-		cur = con.cursor()
-		regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-		uidLen = len(request.form['username'])
-		length_regex = re.compile(r'.{6,}')
-		uppercase_regex = re.compile(r'[A-Z]')
-		lowercase_regex = re.compile(r'[a-z]')
-		digit_regex = re.compile(r'[0-9]')
-		special_regex = re.compile(r'[@#$%^&+=]')
-		if not request.form['fname'] or not request.form['lname'] or not request.form['username'] or not request.form['email'] or not request.form['password'] or not request.form['confirm']:
-			flash('Fill in all fields and try again!', 'danger')
-		if uidLen < 6 or uidLen > 20:
-			flash('Username should be between 6 and 20 characters!', 'danger')
-			error = 1
-		if request.form['password'] != request.form['confirm']:
-			flash('Passwords do not match!', 'danger')
-			error = 1
-		if not re.search(regex, request.form['email']):
-			flash('Enter a valid email!', 'danger')
-			error = 1
-		if not uppercase_regex.search(request.form.get('password')):
-			flash('Password needs at least 1 uppercase letter!', 'danger')
-			error = 1
-		if not lowercase_regex.search(request.form['password']):
-			flash('Password needs at least 1 lowercase letter!', 'danger')
-			error = 1
-		if not digit_regex.search(request.form['password']):
-			flash('Password needs at least 1 number!', 'danger')
-			error = 1
-		if not special_regex.search(request.form['password']):
-			flash('Password needs at least 1 special character!', 'danger')
-			error = 1
-		if not length_regex.search(request.form['password']):
-			flash('Password needs to be at least 6 characters long!', 'danger')
-			error = 1
-		if error == 0:
+		if validateRegistration(request.form):
+			# Do Actual Registration
 			uid = request.form['username'].lower()
+			fname = escape(request.form['fname'])
+			lname = escape(request.form['lname'])
 			email = request.form['email'].lower()
-			cur.execute('SELECT * FROM users WHERE (username=? OR email=?) AND verify=?', [uid, email, None])
-			rows = cur.fetchall()
-			if not rows:
-				fname = request.form['fname']
-				lname = request.form['lname']
-				password = hash_password(request.form['password'])
-				alphabet = string.ascii_letters + string.digits
-				token = ''.join(secrets.choice(alphabet) for i in range(8))
-				confirm_url = url_for(
-					'auth.confirm_email', token=token, _external=True)
-				html = render_template(
-					'activate.html', confirm_url=confirm_url)
-				subject = "Please confirm your email"
-				send_email(email, subject, html)
-				cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', [(fname), (lname), (uid), (email), (password), (token)])
-				con.execute('INSERT INTO matches (user1, user2) VALUES (1, (SELECT id FROM users WHERE users.username = ?))', [uid])
-				con.commit()
-				con.close()
-				flash('Verification Email Sent!', 'success')
-				return redirect(url_for('auth.login'))
-			else:
-				flash('Username or Email is already taken!', 'danger')
-				return redirect(url_for('auth.register'))
+			password = hash_password(request.form['password'])
+			alphabet = string.ascii_letters + string.digits
+			#Create and send the email
+			token = ''.join(secrets.choice(alphabet) for i in range(8))
+			confirm_url = url_for('auth.confirm_email', token=token, _external=True)
+			html = render_template('activate.html', confirm_url=confirm_url)
+			subject = "Please confirm your email"
+			send_email(email, subject, html)
+
+			#Add the user to the DB
+			con = db_connect()
+			cur = con.cursor()
+			cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', [fname, lname, uid, email, password, token])
+			cur.execute('INSERT INTO matches (user1, user2) VALUES (1, (SELECT id FROM users WHERE users.username = ? ))', [uid] )
+			con.commit()
+			con.close()
+			flash('Verification Email Sent!', 'success')
+			return redirect(url_for('auth.login'))
+	# IRRESPECTIVE RENDER DATA OUT
 	try:
 		return render_template('register.html')
 	except TemplateNotFound:
 		abort(404)
-
 
 @auth.route('/login', methods=['GET', 'POST'])
 @not_logged_in
@@ -112,6 +75,7 @@ def login():
 				flash('Email or Password is wrong!', 'danger')
 				error = 1
 			if error == 0:
+				# SET SESSION DATA
 				session['logged_in'] = True
 				if result['username'] == 'system':
 					session['is_admin'] = True
@@ -137,7 +101,6 @@ def login():
 				if result['birthdate']:
 					data = result['birthdate'].split("-")
 					age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
-					cur.execute("UPDATE users SET age=? WHERE id=?", [age, result['id']])
 				con.commit()
 				if result['fname'] and result['lname'] and result['username'] and result['email'] and result['gender'] and result['age'] and result['sexuality'] and result['bio'] and result['path']:
 					cur.execute("UPDATE users SET complete=? WHERE id=?", [1, session['id']])
@@ -196,6 +159,8 @@ def confirm_email(token):
 @not_logged_in
 def reset_password(token):
 	if request.method == 'POST':
+
+		# ======================== Replace with Validate passwords =================
 		length_regex = re.compile(r'.{6,}')
 		uppercase_regex = re.compile(r'[A-Z]')
 		lowercase_regex = re.compile(r'[a-z]')

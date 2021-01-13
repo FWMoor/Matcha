@@ -1,6 +1,7 @@
 import sqlite3
 import os
 
+SQL_PATH = os.path.join(os.path.dirname(__file__), 'matcha.sql')
 DEFAULT_PATH = os.path.join(os.path.dirname(__file__), 'site.db')
 
 def db_connect(db_path=DEFAULT_PATH):
@@ -16,85 +17,11 @@ def dict_factory(cursor, row):
 def setup_tables():
 	con = db_connect()
 	cur = con.cursor()
-	cur.execute("""CREATE TABLE IF NOT EXISTS blocked (
-		userId INTEGER NOT NULL,
-		blockedId	INTEGER NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS reports (
-		userId INTEGER NOT NULL,
-		reportedId	INTEGER NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS matches (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user1	INTEGER NOT NULL,
-		user2	INTEGER NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS likes (
-		user1	INTEGER NOT NULL,
-		user2	INTEGER NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS views (
-		viewed	INTEGER NOT NULL,
-		viewedBy	INTEGER NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS messages (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		matchId INTEGER NOT NULL,
-		senderId INTEGER NOT NULL,
-		receiveId	INTEGER NOT NULL,
-		message TEXT NOT NULL,
-		time TEXT NOT NULL,
-		seen INTEGER DEFAULT 0
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS photos (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		userId INTEGER NOT NULL,
-		path TEXT NOT NULL,
-		profile INTEGER
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS tags (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		tags TEXT NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS usertags (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		userId INTEGER NOT NULL,
-		tagId INTEGER NOT NULL
-	);""")
-	con.commit()
-	cur.execute("""CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		fname	TEXT NOT NULL,
-		lname	TEXT NOT NULL,
-		username TEXT NOT NULL,
-		email	TEXT NOT NULL,
-		password TEXT NOT NULL,
-		verify TEXT,
-		banned INTEGER NOT NULL DEFAULT 0,
-		gender TEXT,
-		bio TEXT,
-		age INTEGER,
-		path TEXT,
-		sexuality TEXT DEFAULT 'S',
-		tags TEXT,
-		complete INTEGER DEFAULT 0,
-		fame INTEGER NOT NULL DEFAULT 0,
-		online INTEGER NOT NULL DEFAULT 0,
-		lastonline TEXT,
-		birthdate TEXT,
-		passreset TEXT,
-		lngCord REAL,
-		latCord REAL,
-		city TEXT,
-		totalviews INTEGER NOT NULL DEFAULT 0
-		);""")
+	with open(SQL_PATH, 'r') as sqlfile:
+		sql = sqlfile.read()
+	cur.executescript(sql)
+	# Add admin account
+	cur.execute('INSERT INTO users (fname, lname, username, email, password, verify) VALUES (?, ?, ?, ?, ?, ?)', 
+	['System', 'System', 'system', 'System@mailcatch.com', '70d6d3db2b8cee727994e89f9b8c21622e39840ad579dd82da37aadd441473aab9996dd749d652b8023791f3862ca3cc584f9ff9c27222217e77af241d3b3abd54486eeb78c733c57aab7aa7ff5709ec90655dee193c4a32e46ffb2796049d0b', None])
 	con.commit()
 	con.close()
