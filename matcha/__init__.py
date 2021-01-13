@@ -14,10 +14,12 @@ from matcha.users.routes import users
 from matcha.errors.handlers import errors
 from matcha.db import setup_tables
 from matcha.chat.routes import chat
+import sys
+
 
 def create_app():
 	app = Flask(__name__)
-	
+	sys.dont_write_bytecode = True	
 	app.config.from_object(Config)
 
 	socketio.init_app(app)

@@ -189,8 +189,11 @@ def message(data):
 				<span class="time-right">{}</span>
 			</div>
 			<br>""".format(session['username'], msg,date_time)
-			JSON = {"message": message, "rawmsg": msg, "roomname": session['room'], "sender": session['username']}
-			emit('update', JSON, room=session['room'], json=True)
+			try:
+				JSON = {"message": message, "rawmsg": msg, "roomname": session['room'], "sender": session['username']}
+				emit('update', JSON, room=session['room'], json=True)
+			except Exception as ex:
+				print('JSON ERROR' + ex)
 
 @is_logged_in
 def sysmsg(data):
@@ -208,8 +211,11 @@ def sysmsg(data):
 			<span class="time-right">{}</span>
 		</div>
 		<br>""".format(session['username'], msg,date_time)
-		JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
-		emit('update', JSON, room=str(room), json=True, namespace = '/')
+		try:
+			JSON = {"message": message, "rawmsg": msg, "roomname": str(room), "sender": "System"}
+			emit('update', JSON, room=str(room), json=True, namespace = '/')
+		except Exception as ex:
+				print('JSON ERROR' + ex)
 
 @socketio.on('update_msgcnt')
 @is_logged_in
