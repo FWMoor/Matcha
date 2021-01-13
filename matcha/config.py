@@ -15,7 +15,7 @@ class Config:
 
 	
 	MAIL_USERNAME="projectmatcha60@gmail.com"
-	MAIL_PASSWORD="matcha123"
+	MAIL_PASSWORD=""
 	SECRET_KEY="secrets.token_urlsafe(16)"
 	UPLOAD_FOLDER="./photos"
 	MAIL_SERVER="smtp.gmail.com"
