@@ -37,13 +37,13 @@ app -> blueprint -> serivce
 <b>Main Blueprint</b> Allows admin to make changes as he wishes or needs
 <b>Users Blueprint</b> Contains buisness logic for user likes and views and so on
 
-static		the folder where the  static files can be found
-templates	the folder containing the Blueprint templates aswell as shared templates
-utils		the folder that contains the utils that can be used by differnt blueprints
-config		the python file that contains all the needed configuration setup that needs to be shared on the application
-db		the connection method to the database aswell as the setup for all the tables
-decorators	the annotation decorators to ensure that a user is logged in or admin and so on
-app		the application entry point
+<i>static</i>		the folder where the  static files can be found.
+<i>templates</i>	the folder containing the Blueprint templates aswell as shared templates.
+<i>utils</i>		the folder that contains the utils that can be used by differnt blueprints.
+<i>config</i>		the python file that contains all the needed configuration setup that needs to be shared on the application.
+<i>db</i>		the connection method to the database aswell as the setup for all the tables.
+<i>decorators</i>	the annotation decorators to ensure that a user is logged in or admin and so on.
+    <i>app</i>		the application entry point
 
 
 ## Test outline 
