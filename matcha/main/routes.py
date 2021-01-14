@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, abort, session, request, flash, redirect, url_for
 from jinja2 import TemplateNotFound
 from matcha.db import db_connect, dict_factory
-
+from matcha.utils.general import getdist
 from matcha.decorators import not_logged_in, is_logged_in, is_admin
-from math import sin, cos, atan2, sqrt, pi
+
 
 main = Blueprint('main', __name__,
 				template_folder='./templates', static_folder='static')
@@ -61,23 +61,7 @@ def remove_report(reportedId):
 	except TemplateNotFound:
 		abort(404)
 
-def deg2radiant(deg):
-	return deg * (pi / 180)
 
-def getdist(lat, lng):
-	try:
-		lat2 = float(session['latCord'])
-		lng2 = float(session['lngCord'])
-		R = 6371
-		dLat = deg2radiant(lat2-lat)
-		dLng = deg2radiant(lng2-lng)
-		a = sin(dLat/2) * sin(dLat/2) + cos(deg2radiant(lat)) * cos(deg2radiant(lat2)) * sin(dLng/2) * sin(dLng/2)
-		c = 2 * atan2(sqrt(a), sqrt(1-a))
-		d = R * c
-		return round(d,4)
-	except:
-		return -1
-		
 @main.route('/feed', methods=['GET', 'POST'])
 @is_logged_in
 def feed():
