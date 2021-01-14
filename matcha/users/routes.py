@@ -10,7 +10,7 @@ from matcha.chat.routes import sysmsg
 
 from matcha.utils.general import get_age
 from matcha.auth.utils import hash_password
-from matcha.decorators import is_logged_in, is_admin_or_logged_in
+from matcha.utils.decorators import is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
 
 ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg'}

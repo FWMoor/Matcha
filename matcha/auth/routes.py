@@ -5,7 +5,7 @@ from datetime import datetime, date
 
 from matcha.utils.general import get_age
 from matcha.auth.utils import hash_password, verify_password
-from matcha.decorators import not_logged_in, is_logged_in, is_admin_or_logged_in
+from matcha.utils.decorators import not_logged_in, is_logged_in, is_admin_or_logged_in
 from matcha.db import db_connect, dict_factory
 from matcha.chat.routes import getsystemmessages, getmessagecount
 from matcha.auth.email import send_email

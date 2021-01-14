@@ -1,6 +1,7 @@
 from flask import session, flash, render_template
 from matcha.db import db_connect, dict_factory
-from matcha.utils.general import getdist 
+from matcha.utils.general import getdist, get_age
+from datetime import date
 
 # Define some reuseable vars
 userQuery = """SELECT u.fname, u.lname, u.email, u.id, u.username, u.gender, u.password, u.bio, u.birthdate, u.sexuality, u.verify, u.complete,
@@ -33,6 +34,8 @@ def get_wantedsexuality(sexuality, gender):
 def search_users(form, gender, sexuality):
 	maxdist = 2147483647
 	mindist = 0
+	minage = 18
+	maxage = 150
 	data = []
 	# Do pagination
 	if (form['submit'] == 'Search'):
@@ -45,15 +48,6 @@ def search_users(form, gender, sexuality):
 	#gender
 	wanted_sexuality = get_wantedsexuality(sexuality, gender)
 	qstr += AddSexualPref(gender, data, wanted_sexuality, sexuality)
-
-	#Age Check
-	if form['MinAge']:
-		qstr += " AND age >= ?"
-		data.append(form['MinAge'])
-
-	if form['MaxAge']:
-		qstr += " AND age <= ?"
-		data.append(form['MaxAge'])
 
 	#Fame Check
 	if form['MinFame']:
@@ -84,12 +78,10 @@ def search_users(form, gender, sexuality):
 	if form['Order']:
 		if form['Order'] == "Username":
 			qstr += ' ORDER BY username ASC'
-		elif form['Order'] == "Age":
-			qstr += ' ORDER BY age ASC'
 		elif form['Order'] == "Fame":
 			qstr += ' ORDER BY fame ASC'
-		elif form['Order'] != 'Distance':
-			print(form['Order'] + ' Cant be sorted by !')
+		elif not (form['Order'] == 'Distance' or form['Order'] == 'Age'):
+			print(form['Order'] + ' Cant be sorted by that!')
 
 	# do the DB stuff
 	con = db_connect()
@@ -111,14 +103,30 @@ def search_users(form, gender, sexuality):
 	
 	if form['MinDist']:
 		mindist = float(form['MinDist'])
+	
+	if form['MinAge']:
+		minage = int(form['MinAge'])
+
+	if form['MaxAge']:
+		maxage = int(form['MaxAge'])
+	
 	for user in tmp:
 		user['distance'] = getdist(user['latCord'], user['lngCord'])
-		if user['distance'] <= maxdist and user['distance'] >= mindist:
+		
+		data = user['birthdate'].split("-")
+		user['age'] = get_age(date(int(data[0]), int(data[1]), int(data[2])))
+		
+		if (user['distance'] <= maxdist and user['distance'] >= mindist and user['age'] >= minage and user['age'] <= maxage):
 			temp.append(user)
-		# sort by distance
+
+		
+	# sort by distance
 	if (form['Order'] == 'Distance'):
 		temp = sorted(temp, key=lambda user: user['distance'])
-	
+	# sort by age
+	if (form['Order'] == 'Age'):
+		temp = sorted(temp, key=lambda user: user['age'])
+
 	#for bug that Fred showed add stop
 	start = (session['page'] - 1) * AMOUNT_PER_PAGE
 	stop = start + AMOUNT_PER_PAGE

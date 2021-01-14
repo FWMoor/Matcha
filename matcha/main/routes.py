@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, session, request, flash, re
 from jinja2 import TemplateNotFound
 from matcha.db import db_connect, dict_factory
 from matcha.utils.general import getdist
-from matcha.decorators import not_logged_in, is_logged_in, is_admin
+from matcha.utils.decorators import not_logged_in, is_logged_in, is_admin
 
 from matcha.main.search import get_currentUser, get_SuggestedUsers, get_wantedsexuality, search_users
 
