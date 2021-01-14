@@ -100,7 +100,7 @@ def profile(username):
 				cur.execute("SELECT * FROM views WHERE viewee=? AND viewer=?", [result['id'], session['id']])
 				view = cur.fetchone()
 				if not view:
-					cur.execute("INSERT INTO views VALUES (?, ?)", [result['id'], session['id']])
+					cur.execute("INSERT INTO views (viewer, viewee) VALUES(?, ?)", [result['id'], session['id']]) #might not be right lol
 					con.commit()
 		if request.method == 'POST':
 			cur.execute("SELECT * FROM photos WHERE userId=?", [result['id']])
@@ -117,12 +117,22 @@ def profile(username):
 					con.commit()
 		cur.execute("SELECT * FROM photos WHERE userId=? ORDER BY profile DESC", [result['id']])
 		pics = cur.fetchall()
+		# Fix this please 
 		profile = pics[0] if pics != [] else None
 		cur.execute("SELECT * FROM tags WHERE id IN (SELECT tagId FROM usertags WHERE userId=?)", [result['id']])
 		tags = cur.fetchall()
-		cur.execute("SELECT * FROM users WHERE id=?", [session['id']])
+		cur.execute("""
+		SELECT
+		u.fname, u.lname, u.email, u.id, u.username, u.gender, u.password, u.bio, u.birthdate, u.sexuality, u.verify,
+		COUNT(p.profile) AS profileset
+		FROM
+			users AS u
+		LEFT JOIN photos AS p ON u.id = p.userId
+		WHERE u.id=?
+		GROUP BY u.id
+		""", [session['id']])
 		complete = cur.fetchone()
-		if complete['fname'] and complete['lname'] and complete['username'] and complete['email'] and complete['gender'] and complete['birthdate'] and complete['sexuality'] and complete['bio'] and complete['ProfilePictureID']:
+		if complete['fname'] and complete['lname'] and complete['username'] and complete['email'] and complete['gender'] and complete['birthdate'] and complete['sexuality'] and complete['bio'] and complete['profileset'] > 0:
 			cur.execute("UPDATE users SET complete=? WHERE id=?", [1, complete['id']])
 		else:
 			cur.execute("UPDATE users SET complete=? WHERE id=?", [0, complete['id']])

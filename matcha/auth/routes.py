@@ -61,7 +61,18 @@ def login():
 		con = db_connect()
 		con.row_factory = dict_factory
 		cur = con.cursor()
-		cur.execute('SELECT u.fname, u.lname, u.email, u.id, u.username, u.gender, u.password, u.bio, u.birthdate, u.sexuality, u.verify, l.latCord, l.lngCord, l.city FROM `users` AS u LEFT JOIN location AS l ON u.id = l.userid WHERE email=? OR username=?', [email, email])
+		cur.execute("""
+		SELECT
+		u.fname, u.lname, u.email, u.id, u.username, u.gender, u.password, u.bio, u.birthdate, u.sexuality, u.verify,
+		l.latCord, l.lngCord, l.city,
+		COUNT(p.profile) AS profileset
+		FROM
+			users AS u
+		LEFT JOIN location AS l ON u.id = l.userid
+		LEFT JOIN photos AS p ON u.id = p.userId
+		WHERE (u.username=? or u.email=?)
+		GROUP BY u.id""", [email, email])
+
 		result = cur.fetchone()
 		if result:
 			if result['verify']:
@@ -98,7 +109,7 @@ def login():
 					data = result['birthdate'].split("-")
 					age = get_age(date(int(data[0]), int(data[1]), int(data[2])))
 				con.commit()
-				if result['fname'] and result['lname'] and result['username'] and result['email'] and result['gender'] and age and result['sexuality'] and result['bio'] and result['path']:
+				if result['fname'] and result['lname'] and result['username'] and result['email'] and result['gender'] and age and result['sexuality'] and result['bio'] and result['profileset'] > 0:
 					cur.execute("UPDATE users SET complete=? WHERE id=?", [1, session['id']])
 				else:
 					cur.execute("UPDATE users SET complete=? WHERE id=?", [0, session['id']])
