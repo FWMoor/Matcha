@@ -312,7 +312,6 @@ def set_pic(photoId):
 	cur.execute("SELECT * FROM photos WHERE userId=? AND id=?", [session['id'], photoId])
 	result = cur.fetchone()
 	if result:
-		cur.execute("UPDATE users SET ProfilePictureID=? WHERE id=?", [result['path'], session['id']])
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND profile=?", [0, session['id'], 1])
 		cur.execute("UPDATE photos SET profile=? WHERE userId=? AND id=?", [1, session['id'], photoId])
 		con.commit()
