@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for, abort
-from matcha.decorators import not_logged_in, is_logged_in
+from matcha.utils.decorators import not_logged_in, is_logged_in
 from .. import socketio
 from flask_socketio import join_room, leave_room, emit
 from matcha.db import db_connect, dict_factory
