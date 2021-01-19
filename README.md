@@ -54,7 +54,7 @@ app -> blueprint -> serivce
 5. View profile suggestions.
 6. Search / Filter
 7. Geolocation
-8. Populatity flexing
+8. Popularity flexing
 9. Notifications 
 10. View a Profile
 11. Like / Unlike
@@ -63,15 +63,15 @@ app -> blueprint -> serivce
 
 ## Expected Outcomes
 1. The webserver launches
-2. a account has been created and a email has been sent
-3. a user can login after verifying his/ her password
-4. a user can edit their profile 
-5. a user should see reccomended profiles 
-6. a user should be able to filter / search for a profile
+2. A account has been created and a email has been sent
+3. A user can login after verifying his/her password
+4. A user can edit their profile 
+5. A user should see recommended profiles 
+6. A user should be able to filter/search for a profile
 7. Geolocation should be supported
 8. People should have popularity ratings
-9. You should be able to receive Notifications
+9. You should be able to receive notifications
 10. You should be able to view a profile
-11. You should be able to like / Unlike a profile
+11. You should be able to like/unlike a profile
 12. You should be able to block a profile
-13. You should be able to send a message to a connected user and receive one back ````
+13. You should be able to send a message to a connected user and receive one back
