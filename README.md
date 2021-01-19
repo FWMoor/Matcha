@@ -78,7 +78,7 @@ app -> blueprint -> service
 6. Search / Filter
 7. Geolocation
 8. Popularity flexing
-9. Notifications
+9. Notifications 
 10. View a Profile
 11. Like / Unlike
 12. Block
@@ -87,15 +87,15 @@ app -> blueprint -> service
 ## Expected Outcomes
 
 1. The webserver launches
-2. an Account has been created and an email has been sent
-3. a User can login after verifying his/ her password
-4. a User can edit their profile
-5. a User should see recommended profiles
-6. a User should be able to filter / search for a profile
+2. A account has been created and a email has been sent
+3. A user can login after verifying his/her password
+4. A user can edit their profile 
+5. A user should see recommended profiles 
+6. A user should be able to filter/search for a profile
 7. Geolocation should be supported
 8. People should have popularity ratings
-9. You should be able to receive Notifications
+9. You should be able to receive notifications
 10. You should be able to view a profile
-11. You should be able to like / Unlike a profile
+11. You should be able to like/unlike a profile
 12. You should be able to block a profile
 13. You should be able to send a message to a connected user and receive one back
